@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <title>Bombscrubber</title>
+  <style type="text/css" media="screen">@import "main.css";</style>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="bombscrubber.js"></script>
+</head>
+<body>
+<noscript>
+  <p>Requires Javascript</p>
+</noscript>
+<h1>LET THE GAMES BEGIN!</h1>
+<div class="column">
+  <div class="menu-container">
+    <h2>Timer:</h2><div id="timer">0</div>
+  </div>
+  <dl class="menu-container">
+    <dt>Starting: </dt><dd>(editable)</dd>
+    <dt>Width: </dt><dd><input type="text" size="2" maxlength="2" id="width" value="16" /></dd>
+    <dt>Height: </dt><dd><input type="text" size="2" maxlength="2" id="height" value="16" /></dd>
+    <dt>Bombs: </dt><dd><input type="text" size="2" maxlength="3" id="number-of-bombs" value="40" /></dd>
+  </dl>
+  <div class="menu-container">
+    <h2>Instructions</h2>
+    <p>Left click to uncover a square</p>
+    <p>Right click to mark a covered square as a bomb</p>
+    <p>Right click a number to clear around it if the correct number of adjacent squares have been flagged.</p>
+    <p><strong>Playing to the bottom of the board reveals that this game is more than your average minesweeper.</strong></p>
+  </div>
+</div>
+<div class="column">
+  <div class="menu-container">
+    <div id="restart">Restart</div>
+  </div>
+  <div id="board-container">
+  </div>
+</div>
+<div class="column">
+  <dl class="menu-container">
+    <dt>Current:</dt>
+    <dt>Squares Left: </dt><dd><div id="covered-squares"></div></dd>
+    <dt>Total Bombs: </dt><dd><div id="total-bombs"></div></dd>
+    <dt>Rows: </dt><dd><div id="rows"></div></dd>
+    <dt>Bombs Left: </dt><dd><div id="bombs-left"></div></dd>
+    <dt>Ratio: </dt><dd><div id="ratio"></div></dd>
+  </dl>
+</div>
+
+</body>
+</html>

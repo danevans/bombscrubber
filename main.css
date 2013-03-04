@@ -1,0 +1,117 @@
+body{
+  background-color: #C0C0C0;
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size: 14px;
+}
+h2{
+  text-align: center;
+  margin: 0 0 5px 0;
+  font-size: 14px;
+}
+.column{
+  float: left;
+  position: relative;
+}
+table{
+  clear: left;
+}
+table, .menu-container{
+  empty-cells: show;
+  padding: 0;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  float: left;
+  clear: left;
+}
+.menu-container{
+  margin: 0 10px 10px 0;
+  padding: 5px 5px 0 5px;
+  width: 245px;
+}
+td div{
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  background-color: #C0C0C0;
+  height: 12px;
+  width: 12px;
+  border-top: 2px solid white;
+  border-left: 2px solid white;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  cursor: pointer;
+}
+#timer, #restart, #covered-squares, #total-bombs, #bombs-left, #width, #height, #number-of-bombs, #non-bombs, #rows, #ratio{
+  background-color: #C0C0C0;
+  border-top: 2px solid white;
+  border-left: 2px solid white;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  color: red;
+  font-family: verdana;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 5px 0;
+}
+#ratio{
+  width: 100%;
+  overflow: hidden;
+}
+dl.menu-container{
+  clear: left;
+}
+dt, dd{
+  margin: 0;
+  padding: 2px 0;
+}
+dt{
+  float: left;
+  clear: left;
+  width: 50%;
+}
+dd{
+  float: left;
+  width: 50%;
+}
+#covered-squares, #bombs-left, #total-bombs, #width, #height, #number-of-bombs, #rows, #non-bombs{
+  width: 3em;
+}
+#restart{
+  color: black;
+  cursor: pointer;
+}
+td div.empty, td div.bomb{
+  height: 15px;
+  width: 15px;
+  border: solid #808080;
+  border-width: 1px 0 0 1px;
+}
+td div.one {   color: #0b24fb;}
+td div.two {   color: #0f7f12;}
+td div.three { color: #fc0d1b;}
+td div.four {  color: #020c7e;}
+td div.five {  color: #7e0308;}
+td div.six {   color: #11807f;}
+td div.seven { color: #000;}
+td div.eight { color: #808080;}
+
+td div.flag{
+  background: url(images/flag.png) center center no-repeat;
+}
+td div.bomb{
+  background: url(images/bomb.png) center center no-repeat;
+}
+.invalid td div{
+  background-color: #9A77A8;
+  border-top-color: #C19ECF;
+  border-right-color: #734F80;
+  border-bottom-color: #734F80;
+  border-left-color: #C19ECF;
+}
+.invalid td div.empty{
+  border-color: #734F80;
+}
