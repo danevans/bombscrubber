@@ -24,6 +24,10 @@ table, .menu-container{
   border-bottom: 2px solid white;
   float: left;
   clear: left;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .menu-container{
   margin: 0 10px 10px 0;
