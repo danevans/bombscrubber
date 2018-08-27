@@ -59,19 +59,24 @@
     return number;
   }
 
+  function lookupCell(element) {
+    var $element = $(element);
+    if (element.tagName === 'DIV') {
+      return GRID[$element.data('row')][$element.data('col')];
+    }
+  }
+
   function leftClick(e) {
-    var coords = e.target.id.split('-'),
-      thisCell;
-    if (coords[0] === 'main') { return false; }
-    thisCell = GRID[+coords[0]][+coords[1]];
-    if (coords[0] < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
+    var thisCell = lookupCell(e.target);
+    if (!thisCell) { return false; }
+    if (thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
       thisCell.click();
     }
   }
 
   function rightClick(e) {
     // first account for browser inconsistency
-    var t, coords, thisCell;
+    var t, thisCell;
     if (!e) {e = window.event; }
     if (e.target) {
       t = e.target;
@@ -80,9 +85,8 @@
     }
     if (t.nodeType === 3) {t = t.parentNode; }
     // now handle the right click
-    coords = t.id.split('-');
-    if (coords[0] === 'main') { return false; }
-    thisCell = GRID[+coords[0]][+coords[1]];
+    thisCell = lookupCell(t);
+    if (!thisCell) { return false; }
     if (thisCell.covered === true) {
       thisCell.flag();
     } else if (thisCell.number === getFlags(thisCell) && thisCell.number !== 0 && thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
@@ -113,8 +117,8 @@
         first = true;
       }
       for (j = 0; j < STARTING_COLS; j++) {
-        row.append('<td><div id="' + i + '-' + j + '"></div></td>');
         GRID[i][j] = new Cell(i, j);
+        $('<td></td>').append(GRID[i][j].element).appendTo(row);
         if (first === true) {
           if (j > 0) {
             if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
@@ -171,25 +175,27 @@
     this.number = 0;
     this.covered = true;
     this.flagged = false;
+    this.element = $('<div></div>').data({ row: row, col: col });
+
     this.click = function () {
       var i, j, q, r, thisCell;
       if (this.covered && !this.flagged) {
         this.covered = false;
         CURRENT_CELLS--;
         $('#covered-squares').html(CURRENT_CELLS);
-        $('#' + this.row + '-' + this.col).addClass('empty');
+        this.element.addClass('empty');
         if (this.row === CURRENT_ROWS - 1) { addNewSection(); }
         if (this.number === 0) {
           clickAround(this);
         } else if (this.number < 9) {
-          $('#' + this.row + '-' + this.col).addClass(numClasses[this.number]).text(this.number);
+          this.element.addClass(numClasses[this.number]).text(this.number);
         } else {
-          $('#' + this.row + '-' + this.col).addClass('bomb').css('backgroundColor', 'red');
+          this.element.addClass('bomb').css('backgroundColor', 'red');
           for (i = 0, q = GRID.length; i < q; i++) {
             for (j = 0, r = GRID[i].length; j < r; j++) {
               thisCell = GRID[i][j];
               if (thisCell.number > 8 && !thisCell.flagged) {
-                $('#' + thisCell.row + '-' + thisCell.col).addClass('bomb');
+                thisCell.element.addClass('bomb');
               }
             }
           }
@@ -201,7 +207,7 @@
             for (j = 0, r = GRID[i].length; j < r; j++) {
               thisCell = GRID[i][j];
               if (thisCell.number > 8) {
-                $('#' + thisCell.row + '-' + thisCell.col).addClass('flag');
+                thisCell.element.addClass('flag');
               }
             }
           }
@@ -215,6 +221,7 @@
         $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
       }
     };
+
     this.flag = function () {
       this.flagged = !this.flagged;
       if (this.flagged) {
@@ -222,7 +229,7 @@
       } else {
         TOTAL_FLAGS--;
       }
-      $('#' + this.row + '-' + this.col).toggleClass('flag');
+      this.element.toggleClass('flag');
       $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
     };
   };
