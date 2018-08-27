@@ -103,16 +103,17 @@
     var i, j, first = false, totalCycles = CYCLES.length,
       newBombR = Math.floor((Math.random() * STARTING_ROWS)) + CURRENT_ROWS,
       newBombC = Math.floor((Math.random() * STARTING_COLS)),
-      currentCell;
-    $('<tbody id="cycle' + totalCycles + '"></tbody>').appendTo('#main-table');
+      currentCell, tbody, row;
+    tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>').appendTo('#main-table');
     for (i = CURRENT_ROWS; i < STARTING_ROWS + CURRENT_ROWS; i++) {
-      $('<tr id="row' + i + '"></tr>').appendTo('#main-table tbody#cycle' + totalCycles);
+      row = $('<tr id="row' + i + '"></tr>');
+      tbody.append(row);
       GRID[i] = [];
       if (i === CURRENT_ROWS && i !== 0) {
         first = true;
       }
       for (j = 0; j < STARTING_COLS; j++) {
-        $('<td><div id="' + i + '-' + j + '"></div></td>').appendTo('#row' + i);
+        row.append('<td><div id="' + i + '-' + j + '"></div></td>');
         GRID[i][j] = new Cell(i, j);
         if (first === true) {
           if (j > 0) {
@@ -126,7 +127,7 @@
       }
     }
     if (totalCycles > CURRENT_CYCLE) {
-      $('#cycle' + totalCycles).addClass('invalid');
+      tbody.addClass('invalid');
     }
     // add entry in the cycles array for this cycle
     CYCLES[totalCycles] = 0;
