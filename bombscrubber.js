@@ -95,12 +95,12 @@
     GAMEOVER = true;
   }
 
-  function addNewSection() {
+  function newSection() {
     var i, j, first, totalCycles = CYCLES.length,
       newBombR, newBombC, currentCell, tbody, row;
-    tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>').appendTo('#main-table');
+    tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>');
     for (i = CURRENT_ROWS; i < STARTING_ROWS + CURRENT_ROWS; i++) {
-      row = $('<tr id="row' + i + '"></tr>');
+      row = $('<tr></tr>');
       tbody.append(row);
       GRID[i] = [];
       first = (i === CURRENT_ROWS && i !== 0);
@@ -144,6 +144,7 @@
     $('#covered-squares').html(CURRENT_CELLS);
     $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
     $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
+    return tbody;
   }
 
   Cell = function (row, col) {
@@ -161,7 +162,9 @@
       CURRENT_CELLS--;
       $('#covered-squares').html(CURRENT_CELLS);
       this.element.addClass('empty');
-      if (this.row === CURRENT_ROWS - 1) { addNewSection(); }
+      if (this.row === CURRENT_ROWS - 1) {
+        $('#main-table').append(newSection());
+      }
       if (this.number === 0) {
         clickAround(this);
       } else if (this.number < 9) {
@@ -216,7 +219,8 @@
     CYCLES = [];
     CURRENT_CYCLE = 0;
     GAMEOVER = false;
-    var timer = 0;
+    var timer = 0,
+      table;
     $('#timer').html(timer);
     //check some possibly user set variables
     if (!isNaN($('#width').val())) {
@@ -237,9 +241,10 @@
     }
     // get the new board set up
     $('#board-container').html('<table id="main-table" cellpadding="0" cellspacing="0" border="0"></table>');
-    addNewSection();
+    table = $('#main-table');
+    table.append(newSection());
     // start the timer
-    $('#main-table').one('click', function () {
+    table.one('click', function () {
       var timerReference = window.setInterval(function() {
         if (!GAMEOVER) {
           timer++;
@@ -248,7 +253,9 @@
           window.clearTimeout(timerReference);
         }
       }, 1000);
-    }).click(leftClick)[0].oncontextmenu = rightClick;
+    });
+    table.click(leftClick)
+    table[0].oncontextmenu = rightClick;
   }
 
   //print the table and add a section to it then turn on the click handlers
