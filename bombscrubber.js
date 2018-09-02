@@ -23,6 +23,15 @@
     }
   }
 
+  function everyCell(action) {
+    var i, j, width, height;
+    for (i = 0, width = GRID.length; i < width; i++) {
+      for (j = 0, height = GRID[i].length; j < height; j++) {
+        action(GRID[i][j]);
+      }
+    }
+  }
+
   function around(centerCell, action) {
     var leftOK = centerCell.col > 0,
       rightOK = centerCell.col < STARTING_COLS - 1;
@@ -160,7 +169,6 @@
     this.element = $('<div></div>').data({ row: row, col: col });
 
     this.click = function () {
-      var i, j, q, r, thisCell;
       if (this.covered && !this.flagged) {
         this.covered = false;
         CURRENT_CELLS--;
@@ -173,26 +181,20 @@
           this.element.addClass(numClasses[this.number]).text(this.number);
         } else {
           this.element.addClass('bomb').css('backgroundColor', 'red');
-          for (i = 0, q = GRID.length; i < q; i++) {
-            for (j = 0, r = GRID[i].length; j < r; j++) {
-              thisCell = GRID[i][j];
-              if (thisCell.number > 8 && !thisCell.flagged) {
-                thisCell.element.addClass('bomb');
-              }
+          everyCell(function(thisCell) {
+            if (thisCell.number > 8 && !thisCell.flagged) {
+              thisCell.element.addClass('bomb');
             }
-          }
+          });
           gameover();
         }
         // every non-bomb square has been uncovered, the player wins
         if (CURRENT_CELLS === CURRENT_BOMBS) {
-          for (i = 0, q = GRID.length; i < q; i++) {
-            for (j = 0, r = GRID[i].length; j < r; j++) {
-              thisCell = GRID[i][j];
-              if (thisCell.number > 8) {
-                thisCell.element.addClass('flag');
-              }
+          everyCell(function(thisCell) {
+            if (thisCell.number > 8) {
+              thisCell.element.addClass('flag');
             }
-          }
+          });
           gameover();
         }
         CYCLES[Math.floor(this.row / STARTING_ROWS)]++;
