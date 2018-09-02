@@ -10,18 +10,8 @@
     CYCLES = [],
     CURRENT_CYCLE = 0,
     GAMEOVER = false,
-    TICK = null,
-    TIMER = 0,
     Cell,
     numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
-
-  // TODO: this should be based on a timestamp
-  function advanceTimer() {
-    if (!GAMEOVER) {
-      TIMER++;
-      $('#timer').html(TIMER);
-    }
-  }
 
   function everyCell(action) {
     var i, j, width, height;
@@ -228,9 +218,8 @@
     CYCLES = [];
     CURRENT_CYCLE = 0;
     GAMEOVER = false;
-    TIMER = 0;
-    window.clearTimeout(TICK);
-    $('#timer').html(TIMER);
+    var timer = 0;
+    $('#timer').html(timer);
     //check some possibly user set variables
     if (!isNaN($('#width').val())) {
       STARTING_COLS = +$('#width').val();
@@ -251,12 +240,17 @@
     // get the new board set up
     $('#board-container').html('<table id="main-table" cellpadding="0" cellspacing="0" border="0"></table>');
     addNewSection();
-    $('#main-table').click(leftClick);
-    document.getElementById('main-table').oncontextmenu = rightClick;
     // start the timer
     $('#main-table').one('click', function () {
-      TICK = window.setInterval(advanceTimer, 1000);
-    });
+      var timerReference = window.setInterval(function() {
+        if (!GAMEOVER) {
+          timer++;
+          $('#timer').html(timer);
+        } else {
+          window.clearTimeout(timerReference);
+        }
+      }, 1000);
+    }).click(leftClick)[0].oncontextmenu = rightClick;
   }
 
   //print the table and add a section to it then turn on the click handlers
