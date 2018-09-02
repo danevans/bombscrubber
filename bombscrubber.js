@@ -96,20 +96,18 @@
   }
 
   function addNewSection() {
-    var i, j, first = false, totalCycles = CYCLES.length,
+    var i, j, first, totalCycles = CYCLES.length,
       newBombR, newBombC, currentCell, tbody, row;
     tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>').appendTo('#main-table');
     for (i = CURRENT_ROWS; i < STARTING_ROWS + CURRENT_ROWS; i++) {
       row = $('<tr id="row' + i + '"></tr>');
       tbody.append(row);
       GRID[i] = [];
-      if (i === CURRENT_ROWS && i !== 0) {
-        first = true;
-      }
+      first = (i === CURRENT_ROWS && i !== 0);
       for (j = 0; j < STARTING_COLS; j++) {
         GRID[i][j] = new Cell(i, j);
         $('<td></td>').append(GRID[i][j].element).appendTo(row);
-        if (first === true) {
+        if (first) {
           if (j > 0) {
             if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
           }
