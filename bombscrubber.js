@@ -23,39 +23,32 @@
     }
   }
 
-  function clickAround(centerCell) {
+  function around(centerCell, action) {
     var leftOK = centerCell.col > 0,
       rightOK = centerCell.col < STARTING_COLS - 1;
     if (centerCell.row > 0) {
-      if (leftOK) { GRID[centerCell.row - 1][centerCell.col - 1].click(); }
-      GRID[centerCell.row - 1][centerCell.col].click();
-      if (rightOK) { GRID[centerCell.row - 1][centerCell.col + 1].click(); }
+      if (leftOK) { action(GRID[centerCell.row - 1][centerCell.col - 1]) }
+      action(GRID[centerCell.row - 1][centerCell.col]);
+      if (rightOK) { action(GRID[centerCell.row - 1][centerCell.col + 1]); }
     }
-    if (leftOK) { GRID[centerCell.row][centerCell.col - 1].click(); }
-    if (rightOK) { GRID[centerCell.row][centerCell.col + 1].click(); }
-    if (centerCell.row < CURRENT_ROWS - 1) {
-      if (leftOK) { GRID[centerCell.row + 1][centerCell.col - 1].click(); }
-      GRID[centerCell.row + 1][centerCell.col].click();
-      if (rightOK) { GRID[centerCell.row + 1][centerCell.col + 1].click(); }
+    if (leftOK) { action(GRID[centerCell.row][centerCell.col - 1]); }
+    if (rightOK) { action(GRID[centerCell.row][centerCell.col + 1]); }
+    if (centerCell.row < STARTING_ROWS + CURRENT_ROWS - 1) {
+      if (leftOK) { action(GRID[centerCell.row + 1][centerCell.col - 1]); }
+      action(GRID[centerCell.row + 1][centerCell.col]);
+      if (rightOK) { action(GRID[centerCell.row + 1][centerCell.col + 1]); }
     }
   }
 
+  function clickAround(centerCell) {
+    around(centerCell, function(otherCell) { otherCell.click(); });
+  }
+
   function getFlags(centerCell) {
-    var number = 0,
-      leftOK = centerCell.col > 0,
-      rightOK = centerCell.col < STARTING_COLS - 1;
-    if (centerCell.row > 0) {
-      if (leftOK && GRID[centerCell.row - 1][centerCell.col - 1].flagged) { number++; }
-      if (GRID[centerCell.row - 1][centerCell.col].flagged) { number++; }
-      if (rightOK && GRID[centerCell.row - 1][centerCell.col + 1].flagged) { number++; }
-    }
-    if (leftOK && GRID[centerCell.row][centerCell.col - 1].flagged) { number++; }
-    if (rightOK && GRID[centerCell.row][centerCell.col + 1].flagged) { number++; }
-    if (centerCell.row < CURRENT_ROWS - 1) {
-      if (leftOK && GRID[centerCell.row + 1][centerCell.col - 1].flagged) { number++; }
-      if (GRID[centerCell.row + 1][centerCell.col].flagged) { number++; }
-      if (rightOK && GRID[centerCell.row + 1][centerCell.col + 1].flagged) { number++; }
-    }
+    var number = 0;
+    around(centerCell, function(otherCell) {
+      if (otherCell.flagged) { number++; }
+    });
     return number;
   }
 
@@ -141,18 +134,7 @@
       currentCell = GRID[newBombR][newBombC];
       if (currentCell.number < 9) {
         currentCell.number = 9;
-        if (newBombR > 0) {
-          if (newBombC > 0) { GRID[newBombR - 1][newBombC - 1].number++; }
-          GRID[newBombR - 1][newBombC].number++;
-          if (newBombC < STARTING_COLS - 1) { GRID[newBombR - 1][newBombC + 1].number++; }
-        }
-        if (newBombC > 0) { GRID[newBombR][newBombC - 1].number++; }
-        if (newBombC < STARTING_COLS - 1) { GRID[newBombR][newBombC + 1].number++; }
-        if (newBombR < STARTING_ROWS + CURRENT_ROWS - 1) {
-          if (newBombC > 0) { GRID[newBombR + 1][newBombC - 1].number++; }
-          GRID[newBombR + 1][newBombC].number++;
-          if (newBombC < STARTING_COLS - 1) { GRID[newBombR + 1][newBombC + 1].number++; }
-        }
+        around(currentCell, function(otherCell) { otherCell.number++; });
         i++;
       }
       newBombR = Math.floor((Math.random() * STARTING_ROWS)) + CURRENT_ROWS;
