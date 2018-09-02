@@ -95,16 +95,16 @@
     GAMEOVER = true;
   }
 
-  function newSection() {
+  function newSection(rows, cols, bombs, offset) {
     var i, j, first, totalCycles = CYCLES.length,
       newBombR, newBombC, currentCell, tbody, row;
     tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>');
-    for (i = CURRENT_ROWS; i < STARTING_ROWS + CURRENT_ROWS; i++) {
+    for (i = offset; i < rows + offset; i++) {
       row = $('<tr></tr>');
       tbody.append(row);
       GRID[i] = [];
-      first = (i === CURRENT_ROWS && i !== 0);
-      for (j = 0; j < STARTING_COLS; j++) {
+      first = (i === offset && i !== 0);
+      for (j = 0; j < cols; j++) {
         GRID[i][j] = new Cell(i, j);
         $('<td></td>').append(GRID[i][j].element).appendTo(row);
         if (first) {
@@ -112,7 +112,7 @@
             if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
           }
           if (GRID[i - 1][j].number > 8) { GRID[i][j].number++; }
-          if (j < STARTING_COLS - 1) {
+          if (j < cols - 1) {
             if (GRID[i - 1][j + 1].number > 8) { GRID[i][j].number++; }
           }
         }
@@ -125,9 +125,9 @@
     CYCLES[totalCycles] = 0;
     // add bombs to the table
     i = 0;
-    while (i < STARTING_BOMBS) {
-      newBombR = Math.floor((Math.random() * STARTING_ROWS)) + CURRENT_ROWS;
-      newBombC = Math.floor((Math.random() * STARTING_COLS));
+    while (i < bombs) {
+      newBombR = Math.floor((Math.random() * rows)) + offset;
+      newBombC = Math.floor((Math.random() * cols));
       currentCell = GRID[newBombR][newBombC];
       if (currentCell.number < 9) {
         currentCell.number = 9;
@@ -136,9 +136,9 @@
       }
     }
     // update the global 'current' variabes
-    CURRENT_BOMBS += STARTING_BOMBS;
-    CURRENT_ROWS += STARTING_ROWS;
-    CURRENT_CELLS += STARTING_ROWS * STARTING_COLS;
+    CURRENT_BOMBS += bombs;
+    CURRENT_ROWS += rows;
+    CURRENT_CELLS += rows * cols;
     $('#rows').html(CURRENT_ROWS);
     $('#total-bombs').html(CURRENT_BOMBS);
     $('#covered-squares').html(CURRENT_CELLS);
@@ -163,7 +163,7 @@
       $('#covered-squares').html(CURRENT_CELLS);
       this.element.addClass('empty');
       if (this.row === CURRENT_ROWS - 1) {
-        $('#main-table').append(newSection());
+        $('#main-table').append(newSection(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS));
       }
       if (this.number === 0) {
         clickAround(this);
@@ -242,7 +242,7 @@
     // get the new board set up
     $('#board-container').html('<table id="main-table" cellpadding="0" cellspacing="0" border="0"></table>');
     table = $('#main-table');
-    table.append(newSection());
+    table.append(newSection(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS));
     // start the timer
     table.one('click', function () {
       var timerReference = window.setInterval(function() {
