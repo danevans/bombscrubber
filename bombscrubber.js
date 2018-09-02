@@ -107,9 +107,7 @@
 
   function addNewSection() {
     var i, j, first = false, totalCycles = CYCLES.length,
-      newBombR = Math.floor((Math.random() * STARTING_ROWS)) + CURRENT_ROWS,
-      newBombC = Math.floor((Math.random() * STARTING_COLS)),
-      currentCell, tbody, row;
+      newBombR, newBombC, currentCell, tbody, row;
     tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>').appendTo('#main-table');
     for (i = CURRENT_ROWS; i < STARTING_ROWS + CURRENT_ROWS; i++) {
       row = $('<tr id="row' + i + '"></tr>');
@@ -140,14 +138,14 @@
     // add bombs to the table
     i = 0;
     while (i < STARTING_BOMBS) {
+      newBombR = Math.floor((Math.random() * STARTING_ROWS)) + CURRENT_ROWS;
+      newBombC = Math.floor((Math.random() * STARTING_COLS));
       currentCell = GRID[newBombR][newBombC];
       if (currentCell.number < 9) {
         currentCell.number = 9;
         around(currentCell, function(otherCell) { otherCell.number++; });
         i++;
       }
-      newBombR = Math.floor((Math.random() * STARTING_ROWS)) + CURRENT_ROWS;
-      newBombC = Math.floor((Math.random() * STARTING_COLS));
     }
     // update the global 'current' variabes
     CURRENT_BOMBS += STARTING_BOMBS;
