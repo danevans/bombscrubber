@@ -7,8 +7,6 @@
     CURRENT_CELLS = 0,
     TOTAL_FLAGS = 0,
     GRID = [],
-    CYCLES = [],
-    CURRENT_CYCLE = 0,
     TIMER_REFERENCE;
 
   function everyCell(action) {
@@ -72,14 +70,13 @@
 
   class Section {
     constructor(rows, cols, bombs, offset) {
-      const totalCycles = CYCLES.length;
       this.rows = rows;
       this.cols = cols;
       this.bombs = bombs;
       this.offset = offset;
+      this.clicks = 0;
       this.element = document.createElement('tbody');
-      this.element.id = 'cycle' + totalCycles;
-      if (totalCycles > CURRENT_CYCLE) {
+      if (0 < offset) {
         this.element.classList.add('invalid');
       }
       for (let i = offset; i < rows + offset; i++) {
@@ -102,10 +99,12 @@
         }
       }
 
-      // add entry in the cycles array for this cycle
-      CYCLES[totalCycles] = 0;
       this.addBombs();
       this.updateGlobals();
+    }
+
+    get last() {
+      return this.next ? this.next.last : this;
     }
 
     addBombs() {
@@ -166,7 +165,9 @@
         document.getElementById('covered-squares').textContent = CURRENT_CELLS;
         this.element.classList.add('empty');
         if (this.row === CURRENT_ROWS - 1) {
+          const last = this.section.last;
           const section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+          last.next = section;
           document.getElementById('main-table').appendChild(section.element);
         }
         if (this.number === 0) {
@@ -192,10 +193,9 @@
           });
           gameover();
         }
-        CYCLES[Math.floor(this.row / STARTING_ROWS)]++;
-        if (CYCLES[CURRENT_CYCLE] === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
-          CURRENT_CYCLE++;
-          document.getElementById('cycle' + CURRENT_CYCLE).classList.remove('invalid');
+        this.section.clicks++;
+        if (this.section.clicks === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
+          this.section.next.element.classList.remove('invalid');
         }
         document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
       }
@@ -225,8 +225,6 @@
     CURRENT_CELLS = 0;
     TOTAL_FLAGS = 0;
     GRID = [];
-    CYCLES = [];
-    CURRENT_CYCLE = 0;
 
     //check some possibly user set variables
     if (!isNaN(document.getElementById('width').value)) {
