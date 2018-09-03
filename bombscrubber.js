@@ -243,7 +243,8 @@
     if (!isNaN(bombs) && bombs < STARTING_COLS * STARTING_ROWS * 0.75) {
       STARTING_BOMBS = +bombs;
     } else {
-      document.getElementById('number-of-bombs').value = Math.floor(STARTING_COLS * STARTING_ROWS * 0.75);
+      STARTING_BOMBS = Math.floor(STARTING_COLS * STARTING_ROWS * 0.75);
+      document.getElementById('number-of-bombs').value = STARTING_BOMBS;
     }
     // get the new board set up
     const table = document.createElement('table');
