@@ -148,11 +148,11 @@
     CURRENT_BOMBS += this.bombs;
     CURRENT_ROWS += this.rows;
     CURRENT_CELLS += this.rows * this.cols;
-    $('#rows').html(CURRENT_ROWS);
-    $('#total-bombs').html(CURRENT_BOMBS);
-    $('#covered-squares').html(CURRENT_CELLS);
-    $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
-    $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
+    document.getElementById('rows').textContent = CURRENT_ROWS;
+    document.getElementById('total-bombs').textContent = CURRENT_BOMBS;
+    document.getElementById('covered-squares').textContent = CURRENT_CELLS;
+    document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
+    document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
   };
 
   Cell = function (row, col) {
@@ -171,11 +171,11 @@
     if (this.covered && !this.flagged) {
       this.covered = false;
       CURRENT_CELLS--;
-      $('#covered-squares').html(CURRENT_CELLS);
+      document.getElementById('covered-squares').textContent = CURRENT_CELLS;
       this.element.classList.add('empty');
       if (this.row === CURRENT_ROWS - 1) {
         section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
-        $('#main-table').append(section.element);
+        document.getElementById('main-table').appendChild(section.element);
       }
       if (this.number === 0) {
         clickAround(this);
@@ -203,9 +203,9 @@
       CYCLES[Math.floor(this.row / STARTING_ROWS)]++;
       if (CYCLES[CURRENT_CYCLE] === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
         CURRENT_CYCLE++;
-        $('#cycle' + CURRENT_CYCLE).removeClass('invalid');
+        document.getElementById('cycle' + CURRENT_CYCLE).classList.remove('invalid');
       }
-      $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
+      document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
     }
   };
 
@@ -217,7 +217,7 @@
       TOTAL_FLAGS--;
     }
     this.element.classList.toggle('flag');
-    $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
+    document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
   };
 
   function initBoard() {
