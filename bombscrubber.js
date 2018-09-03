@@ -100,15 +100,16 @@
     this.cols = cols;
     this.bombs = bombs;
     this.offset = offset;
-    this.element = tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>');
+    this.element = tbody = document.createElement('tbody');
+    tbody.id = 'cycle' + totalCycles;
     for (i = offset; i < rows + offset; i++) {
-      row = $('<tr></tr>');
-      tbody.append(row);
+      row = document.createElement('tr');
+      tbody.appendChild(row);
       GRID[i] = [];
       first = (i === offset && i !== 0);
       for (j = 0; j < cols; j++) {
         GRID[i][j] = new Cell(i, j);
-        $('<td></td>').append(GRID[i][j].element).appendTo(row);
+        row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
         if (first) {
           if (j > 0) {
             if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
@@ -121,7 +122,7 @@
       }
     }
     if (totalCycles > CURRENT_CYCLE) {
-      tbody.addClass('invalid');
+      tbody.classList.add('invalid');
     }
     // add entry in the cycles array for this cycle
     CYCLES[totalCycles] = 0;
