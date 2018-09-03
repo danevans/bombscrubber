@@ -64,17 +64,7 @@
 
   function rightClick(e) {
     e.preventDefault();
-    // first account for browser inconsistency
-    var t, thisCell;
-    if (!e) {e = window.event; }
-    if (e.target) {
-      t = e.target;
-    } else if (e.srcElement) {
-      t = e.srcElement;
-    }
-    if (t.nodeType === 3) {t = t.parentNode; }
-    // now handle the right click
-    thisCell = lookupCell(t);
+    thisCell = lookupCell(e.target);
     if (!thisCell) { return false; }
     if (thisCell.covered === true) {
       thisCell.flag();
