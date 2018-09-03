@@ -10,7 +10,6 @@
     CYCLES = [],
     CURRENT_CYCLE = 0,
     TIMER_REFERENCE,
-    Cell,
     numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
   function everyCell(action) {
@@ -90,131 +89,135 @@
     document.getElementById('main-table').removeEventListener('contextmenu', rightClick);
   }
 
-  function Section(rows, cols, bombs, offset) {
-    var i, j, first, totalCycles = CYCLES.length, tbody, row;
-    this.rows = rows;
-    this.cols = cols;
-    this.bombs = bombs;
-    this.offset = offset;
-    this.element = tbody = document.createElement('tbody');
-    tbody.id = 'cycle' + totalCycles;
-    for (i = offset; i < rows + offset; i++) {
-      row = document.createElement('tr');
-      tbody.appendChild(row);
-      GRID[i] = [];
-      first = (i === offset && i !== 0);
-      for (j = 0; j < cols; j++) {
-        GRID[i][j] = new Cell(i, j);
-        row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
-        if (first) {
-          if (j > 0) {
-            if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
-          }
-          if (GRID[i - 1][j].number > 8) { GRID[i][j].number++; }
-          if (j < cols - 1) {
-            if (GRID[i - 1][j + 1].number > 8) { GRID[i][j].number++; }
+  class Section {
+    constructor(rows, cols, bombs, offset) {
+      var i, j, first, totalCycles = CYCLES.length, tbody, row;
+      this.rows = rows;
+      this.cols = cols;
+      this.bombs = bombs;
+      this.offset = offset;
+      this.element = tbody = document.createElement('tbody');
+      tbody.id = 'cycle' + totalCycles;
+      for (i = offset; i < rows + offset; i++) {
+        row = document.createElement('tr');
+        tbody.appendChild(row);
+        GRID[i] = [];
+        first = (i === offset && i !== 0);
+        for (j = 0; j < cols; j++) {
+          GRID[i][j] = new Cell(i, j);
+          row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
+          if (first) {
+            if (j > 0) {
+              if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
+            }
+            if (GRID[i - 1][j].number > 8) { GRID[i][j].number++; }
+            if (j < cols - 1) {
+              if (GRID[i - 1][j + 1].number > 8) { GRID[i][j].number++; }
+            }
           }
         }
       }
+      if (totalCycles > CURRENT_CYCLE) {
+        tbody.classList.add('invalid');
+      }
+      // add entry in the cycles array for this cycle
+      CYCLES[totalCycles] = 0;
+      this.addBombs();
+      this.updateGlobals();
     }
-    if (totalCycles > CURRENT_CYCLE) {
-      tbody.classList.add('invalid');
-    }
-    // add entry in the cycles array for this cycle
-    CYCLES[totalCycles] = 0;
-    this.addBombs();
-    this.updateGlobals();
-  }
 
-  Section.prototype.addBombs = function() {
-    var i = 0, newBombC, newBombR, currentCell;
-    while (i < this.bombs) {
-      newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
-      newBombC = Math.floor((Math.random() * this.cols));
-      currentCell = GRID[newBombR][newBombC];
-      if (currentCell.number < 9) {
-        currentCell.number = 9;
-        around(currentCell, otherCell => otherCell.number++);
-        i++;
+    addBombs() {
+      var i = 0, newBombC, newBombR, currentCell;
+      while (i < this.bombs) {
+        newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
+        newBombC = Math.floor((Math.random() * this.cols));
+        currentCell = GRID[newBombR][newBombC];
+        if (currentCell.number < 9) {
+          currentCell.number = 9;
+          around(currentCell, otherCell => otherCell.number++);
+          i++;
+        }
       }
     }
-  }
 
-  Section.prototype.updateGlobals = function() {
-    CURRENT_BOMBS += this.bombs;
-    CURRENT_ROWS += this.rows;
-    CURRENT_CELLS += this.rows * this.cols;
-    document.getElementById('rows').textContent = CURRENT_ROWS;
-    document.getElementById('total-bombs').textContent = CURRENT_BOMBS;
-    document.getElementById('covered-squares').textContent = CURRENT_CELLS;
-    document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
-    document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
-  };
-
-  Cell = function (row, col) {
-    this.row = row;
-    this.col = col;
-    this.number = 0;
-    this.covered = true;
-    this.flagged = false;
-    this.element = document.createElement('div');
-    this.element.dataset.row = row;
-    this.element.dataset.col = col;
-  };
-
-  Cell.prototype.click = function () {
-    var section;
-    if (this.covered && !this.flagged) {
-      this.covered = false;
-      CURRENT_CELLS--;
+    updateGlobals() {
+      CURRENT_BOMBS += this.bombs;
+      CURRENT_ROWS += this.rows;
+      CURRENT_CELLS += this.rows * this.cols;
+      document.getElementById('rows').textContent = CURRENT_ROWS;
+      document.getElementById('total-bombs').textContent = CURRENT_BOMBS;
       document.getElementById('covered-squares').textContent = CURRENT_CELLS;
-      this.element.classList.add('empty');
-      if (this.row === CURRENT_ROWS - 1) {
-        section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
-        document.getElementById('main-table').appendChild(section.element);
-      }
-      if (this.number === 0) {
-        clickAround(this);
-      } else if (this.number < 9) {
-        this.element.classList.add(numClasses[this.number]);
-        this.element.textContent = this.number;
-      } else {
-        this.element.classList.add('bomb', 'exploded');
-        everyCell(thisCell => {
-          if (thisCell.number > 8 && !thisCell.flagged) {
-            thisCell.element.classList.add('bomb');
-          }
-        });
-        gameover();
-      }
-      // every non-bomb square has been uncovered, the player wins
-      if (CURRENT_CELLS === CURRENT_BOMBS) {
-        everyCell(thisCell => {
-          if (thisCell.number > 8) {
-            thisCell.element.classList.add('flag');
-          }
-        });
-        gameover();
-      }
-      CYCLES[Math.floor(this.row / STARTING_ROWS)]++;
-      if (CYCLES[CURRENT_CYCLE] === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
-        CURRENT_CYCLE++;
-        document.getElementById('cycle' + CURRENT_CYCLE).classList.remove('invalid');
-      }
+      document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
       document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
     }
-  };
+  }
 
-  Cell.prototype.flag = function () {
-    this.flagged = !this.flagged;
-    if (this.flagged) {
-      TOTAL_FLAGS++;
-    } else {
-      TOTAL_FLAGS--;
+  class Cell {
+    constructor (row, col) {
+      this.row = row;
+      this.col = col;
+      this.number = 0;
+      this.covered = true;
+      this.flagged = false;
+      this.element = document.createElement('div');
+      this.element.dataset.row = row;
+      this.element.dataset.col = col;
     }
-    this.element.classList.toggle('flag');
-    document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
-  };
+
+    click() {
+      var section;
+      if (this.covered && !this.flagged) {
+        this.covered = false;
+        CURRENT_CELLS--;
+        document.getElementById('covered-squares').textContent = CURRENT_CELLS;
+        this.element.classList.add('empty');
+        if (this.row === CURRENT_ROWS - 1) {
+          section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+          document.getElementById('main-table').appendChild(section.element);
+        }
+        if (this.number === 0) {
+          clickAround(this);
+        } else if (this.number < 9) {
+          this.element.classList.add(numClasses[this.number]);
+          this.element.textContent = this.number;
+        } else {
+          this.element.classList.add('bomb', 'exploded');
+          everyCell(thisCell => {
+            if (thisCell.number > 8 && !thisCell.flagged) {
+              thisCell.element.classList.add('bomb');
+            }
+          });
+          gameover();
+        }
+        // every non-bomb square has been uncovered, the player wins
+        if (CURRENT_CELLS === CURRENT_BOMBS) {
+          everyCell(thisCell => {
+            if (thisCell.number > 8) {
+              thisCell.element.classList.add('flag');
+            }
+          });
+          gameover();
+        }
+        CYCLES[Math.floor(this.row / STARTING_ROWS)]++;
+        if (CYCLES[CURRENT_CYCLE] === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
+          CURRENT_CYCLE++;
+          document.getElementById('cycle' + CURRENT_CYCLE).classList.remove('invalid');
+        }
+        document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
+      }
+    }
+
+    flag() {
+      this.flagged = !this.flagged;
+      if (this.flagged) {
+        TOTAL_FLAGS++;
+      } else {
+        TOTAL_FLAGS--;
+      }
+      this.element.classList.toggle('flag');
+      document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
+    }
+  }
 
   function initBoard() {
     var board = document.getElementById('board-container');
