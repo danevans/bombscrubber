@@ -14,12 +14,9 @@
     numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
   function everyCell(action) {
-    var i, j, width, height;
-    for (i = 0, width = GRID.length; i < width; i++) {
-      for (j = 0, height = GRID[i].length; j < height; j++) {
-        action(GRID[i][j]);
-      }
-    }
+    GRID.forEach(row => {
+      row.forEach(action);
+    });
   }
 
   function around(centerCell, action) {
@@ -40,12 +37,12 @@
   }
 
   function clickAround(centerCell) {
-    around(centerCell, function(otherCell) { otherCell.click(); });
+    around(centerCell, otherCell => otherCell.click());
   }
 
   function getFlags(centerCell) {
     var number = 0;
-    around(centerCell, function(otherCell) {
+    around(centerCell, otherCell => {
       if (otherCell.flagged) { number++; }
     });
     return number;
@@ -137,7 +134,7 @@
       currentCell = GRID[newBombR][newBombC];
       if (currentCell.number < 9) {
         currentCell.number = 9;
-        around(currentCell, function(otherCell) { otherCell.number++; });
+        around(currentCell, otherCell => otherCell.number++);
         i++;
       }
     }
@@ -183,7 +180,7 @@
         this.element.textContent = this.number;
       } else {
         this.element.classList.add('bomb', 'exploded');
-        everyCell(function(thisCell) {
+        everyCell(thisCell => {
           if (thisCell.number > 8 && !thisCell.flagged) {
             thisCell.element.classList.add('bomb');
           }
@@ -192,7 +189,7 @@
       }
       // every non-bomb square has been uncovered, the player wins
       if (CURRENT_CELLS === CURRENT_BOMBS) {
-        everyCell(function(thisCell) {
+        everyCell(thisCell => {
           if (thisCell.number > 8) {
             thisCell.element.classList.add('flag');
           }
@@ -222,9 +219,7 @@
   function initBoard() {
     var board = document.getElementById('board-container');
     // remove any old board
-    board.childNodes.forEach(function(node) {
-      board.removeChild(node);
-    });
+    board.childNodes.forEach(node => board.removeChild(node));
     // reinitialize variables
     CURRENT_ROWS = 0;
     CURRENT_BOMBS = 0;
@@ -259,25 +254,23 @@
     table = document.createElement('table');
     table.id = 'main-table';
     table.border = 0;
-    board.appendChild(table);
     section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
     table.appendChild(section.element);
     // start the timer
-    table.addEventListener('click', function () {
-      TIMER_REFERENCE = window.setInterval(function() {
+    table.addEventListener('click', () => {
+      TIMER_REFERENCE = window.setInterval(() => {
         timer++;
         document.getElementById('timer').textContent = timer;
       }, 1000);
     }, { once: true });
     table.addEventListener('click', leftClick);
     table.addEventListener('contextmenu', rightClick);
+    board.appendChild(table);
   }
 
   window.onload = function () {
     initBoard();
-    document.getElementById('restart').addEventListener('click', function () {
-      initBoard();
-    });
+    document.getElementById('restart').addEventListener('click', initBoard);
   };
 
 }());
