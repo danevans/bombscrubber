@@ -1,8 +1,5 @@
 (function () {
-  let STARTING_ROWS = 16,
-    STARTING_COLS = 16,
-    CURRENT_ROWS = 0,
-    STARTING_BOMBS = 40,
+  let CURRENT_ROWS = 0,
     CURRENT_BOMBS = 0,
     CURRENT_CELLS = 0,
     TOTAL_FLAGS = 0,
@@ -17,7 +14,7 @@
 
   function around(centerCell, action) {
     const leftOK = centerCell.col > 0;
-    const rightOK = centerCell.col < STARTING_COLS - 1;
+    const rightOK = centerCell.col < centerCell.section.cols - 1;
     if (centerCell.row > 0) {
       if (leftOK) { action(GRID[centerCell.row - 1][centerCell.col - 1]) }
       action(GRID[centerCell.row - 1][centerCell.col]);
@@ -25,7 +22,7 @@
     }
     if (leftOK) { action(GRID[centerCell.row][centerCell.col - 1]); }
     if (rightOK) { action(GRID[centerCell.row][centerCell.col + 1]); }
-    if (centerCell.row < STARTING_ROWS + CURRENT_ROWS - 1) {
+    if (centerCell.row < centerCell.section.rows + CURRENT_ROWS - 1) {
       if (leftOK) { action(GRID[centerCell.row + 1][centerCell.col - 1]); }
       action(GRID[centerCell.row + 1][centerCell.col]);
       if (rightOK) { action(GRID[centerCell.row + 1][centerCell.col + 1]); }
@@ -166,7 +163,7 @@
         this.element.classList.add('empty');
         if (this.row === CURRENT_ROWS - 1) {
           const last = this.section.last;
-          const section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+          const section = new Section(last.rows, last.cols, last.bombs, CURRENT_ROWS);
           last.next = section;
           document.getElementById('main-table').appendChild(section.element);
         }
@@ -194,7 +191,7 @@
           gameover();
         }
         this.section.clicks++;
-        if (this.section.clicks === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
+        if (this.section.clicks === this.section.rows * this.section.cols - this.section.bombs) {
           this.section.next.element.classList.remove('invalid');
         }
         document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
@@ -215,7 +212,7 @@
 
   Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
-  function initBoard() {
+  function initBoard(rows = 16, cols = 16, bombs = 40) {
     const board = document.getElementById('board-container');
     // remove any old board
     board.childNodes.forEach(node => board.removeChild(node));
@@ -228,27 +225,27 @@
 
     //check some possibly user set variables
     if (!isNaN(document.getElementById('width').value)) {
-      STARTING_COLS = +document.getElementById('width').value;
+      cols = +document.getElementById('width').value;
     } else {
-      document.getElementById('width').value = STARTING_COLS;
+      document.getElementById('width').value = cols;
     }
     if (!isNaN(document.getElementById('height').value)) {
-      STARTING_ROWS = +document.getElementById('height').value;
+      rows = +document.getElementById('height').value;
     } else {
-      document.getElementById('height').value = STARTING_ROWS;
+      document.getElementById('height').value = rows;
     }
-    const bombs = document.getElementById('number-of-bombs').value;
-    if (!isNaN(bombs) && bombs < STARTING_COLS * STARTING_ROWS * 0.75) {
-      STARTING_BOMBS = +bombs;
+    const bombsValue = document.getElementById('number-of-bombs').value;
+    if (!isNaN(bombsValue) && bombsValue < cols * rows * 0.75) {
+      bombs = +bombsValue;
     } else {
-      STARTING_BOMBS = Math.floor(STARTING_COLS * STARTING_ROWS * 0.75);
-      document.getElementById('number-of-bombs').value = STARTING_BOMBS;
+      bombs = Math.floor(cols * rows * 0.75);
+      document.getElementById('number-of-bombs').value = bombs;
     }
     // get the new board set up
     const table = document.createElement('table');
     table.id = 'main-table';
     table.border = 0;
-    const section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+    const section = new Section(rows, cols, bombs, CURRENT_ROWS);
     table.appendChild(section.element);
 
     // start the timer
