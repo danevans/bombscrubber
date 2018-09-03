@@ -1,5 +1,5 @@
 (function () {
-  var STARTING_ROWS = 16,
+  let STARTING_ROWS = 16,
     STARTING_COLS = 16,
     CURRENT_ROWS = 0,
     STARTING_BOMBS = 40,
@@ -9,8 +9,7 @@
     GRID = [],
     CYCLES = [],
     CURRENT_CYCLE = 0,
-    TIMER_REFERENCE,
-    numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+    TIMER_REFERENCE;
 
   function everyCell(action) {
     GRID.forEach(row => {
@@ -19,8 +18,8 @@
   }
 
   function around(centerCell, action) {
-    var leftOK = centerCell.col > 0,
-      rightOK = centerCell.col < STARTING_COLS - 1;
+    const leftOK = centerCell.col > 0;
+    const rightOK = centerCell.col < STARTING_COLS - 1;
     if (centerCell.row > 0) {
       if (leftOK) { action(GRID[centerCell.row - 1][centerCell.col - 1]) }
       action(GRID[centerCell.row - 1][centerCell.col]);
@@ -47,7 +46,7 @@
 
   function leftClick(e) {
     e.preventDefault();
-    var thisCell = lookupCell(e.target);
+    const thisCell = lookupCell(e.target);
     if (!thisCell) { return false; }
     if (thisCell.clickable) {
       thisCell.click();
@@ -56,7 +55,7 @@
 
   function rightClick(e) {
     e.preventDefault();
-    thisCell = lookupCell(e.target);
+    const thisCell = lookupCell(e.target);
     if (!thisCell) { return false; }
     if (thisCell.covered === true) {
       thisCell.flag();
@@ -73,19 +72,22 @@
 
   class Section {
     constructor(rows, cols, bombs, offset) {
-      var i, j, first, totalCycles = CYCLES.length, tbody, row;
+      const totalCycles = CYCLES.length;
       this.rows = rows;
       this.cols = cols;
       this.bombs = bombs;
       this.offset = offset;
-      this.element = tbody = document.createElement('tbody');
-      tbody.id = 'cycle' + totalCycles;
-      for (i = offset; i < rows + offset; i++) {
-        row = document.createElement('tr');
-        tbody.appendChild(row);
+      this.element = document.createElement('tbody');
+      this.element.id = 'cycle' + totalCycles;
+      if (totalCycles > CURRENT_CYCLE) {
+        this.element.classList.add('invalid');
+      }
+      for (let i = offset; i < rows + offset; i++) {
+        const row = document.createElement('tr');
+        this.element.appendChild(row);
         GRID[i] = [];
-        first = (i === offset && i !== 0);
-        for (j = 0; j < cols; j++) {
+        const first = (i === offset && i !== 0);
+        for (let j = 0; j < cols; j++) {
           GRID[i][j] = new Cell(i, j, this);
           row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
           if (first) {
@@ -99,9 +101,7 @@
           }
         }
       }
-      if (totalCycles > CURRENT_CYCLE) {
-        tbody.classList.add('invalid');
-      }
+
       // add entry in the cycles array for this cycle
       CYCLES[totalCycles] = 0;
       this.addBombs();
@@ -109,11 +109,11 @@
     }
 
     addBombs() {
-      var i = 0, newBombC, newBombR, currentCell;
+      let i = 0;
       while (i < this.bombs) {
-        newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
-        newBombC = Math.floor((Math.random() * this.cols));
-        currentCell = GRID[newBombR][newBombC];
+        const newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
+        const newBombC = Math.floor((Math.random() * this.cols));
+        const currentCell = GRID[newBombR][newBombC];
         if (currentCell.number < 9) {
           currentCell.number = 9;
           around(currentCell, otherCell => otherCell.number++);
@@ -152,7 +152,7 @@
     }
 
     get flags() {
-      var number = 0;
+      let number = 0;
       around(this, otherCell => {
         if (otherCell.flagged) { number++; }
       });
@@ -160,20 +160,19 @@
     }
 
     click() {
-      var section;
       if (this.covered && !this.flagged) {
         this.covered = false;
         CURRENT_CELLS--;
         document.getElementById('covered-squares').textContent = CURRENT_CELLS;
         this.element.classList.add('empty');
         if (this.row === CURRENT_ROWS - 1) {
-          section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+          const section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
           document.getElementById('main-table').appendChild(section.element);
         }
         if (this.number === 0) {
           clickAround(this);
         } else if (this.number < 9) {
-          this.element.classList.add(numClasses[this.number]);
+          this.element.classList.add(Cell.numClasses[this.number]);
           this.element.textContent = this.number;
         } else {
           this.element.classList.add('bomb', 'exploded');
@@ -214,8 +213,10 @@
     }
   }
 
+  Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+
   function initBoard() {
-    var board = document.getElementById('board-container');
+    const board = document.getElementById('board-container');
     // remove any old board
     board.childNodes.forEach(node => board.removeChild(node));
     // reinitialize variables
@@ -226,11 +227,7 @@
     GRID = [];
     CYCLES = [];
     CURRENT_CYCLE = 0;
-    var timer = 0,
-      table, section,
-      bombs = document.getElementById('number-of-bombs').value;
-    window.clearTimeout(TIMER_REFERENCE);
-    document.getElementById('timer').textContent = timer;
+
     //check some possibly user set variables
     if (!isNaN(document.getElementById('width').value)) {
       STARTING_COLS = +document.getElementById('width').value;
@@ -242,25 +239,30 @@
     } else {
       document.getElementById('height').value = STARTING_ROWS;
     }
-
+    const bombs = document.getElementById('number-of-bombs').value;
     if (!isNaN(bombs) && bombs < STARTING_COLS * STARTING_ROWS * 0.75) {
       STARTING_BOMBS = +bombs;
     } else {
       document.getElementById('number-of-bombs').value = Math.floor(STARTING_COLS * STARTING_ROWS * 0.75);
     }
     // get the new board set up
-    table = document.createElement('table');
+    const table = document.createElement('table');
     table.id = 'main-table';
     table.border = 0;
-    section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+    const section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
     table.appendChild(section.element);
+
     // start the timer
+    let timer = 0;
+    window.clearTimeout(TIMER_REFERENCE);
+    document.getElementById('timer').textContent = timer;
     table.addEventListener('click', () => {
       TIMER_REFERENCE = window.setInterval(() => {
         timer++;
         document.getElementById('timer').textContent = timer;
       }, 1000);
     }, { once: true });
+
     table.addEventListener('click', leftClick);
     table.addEventListener('contextmenu', rightClick);
     board.appendChild(table);
