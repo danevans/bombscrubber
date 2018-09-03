@@ -221,8 +221,11 @@
   };
 
   function initBoard() {
+    var board = document.getElementById('board-container');
     // remove any old board
-    $('#board-container').html();
+    board.childNodes.forEach(function(node) {
+      board.removeChild(node);
+    });
     // reinitialize variables
     CURRENT_ROWS = 0;
     CURRENT_BOMBS = 0;
@@ -232,40 +235,43 @@
     CYCLES = [];
     CURRENT_CYCLE = 0;
     var timer = 0,
-      table, section;
+      table, section,
+      bombs = document.getElementById('number-of-bombs').value;
     window.clearTimeout(TIMER_REFERENCE);
-    $('#timer').html(timer);
+    document.getElementById('timer').textContent = timer;
     //check some possibly user set variables
-    if (!isNaN($('#width').val())) {
-      STARTING_COLS = +$('#width').val();
+    if (!isNaN(document.getElementById('width').value)) {
+      STARTING_COLS = +document.getElementById('width').value;
     } else {
-      $('#width').val(STARTING_COLS);
+      document.getElementById('width').value = STARTING_COLS;
     }
-    if (!isNaN($('#height').val())) {
-      STARTING_ROWS = +$('#height').val();
+    if (!isNaN(document.getElementById('height').value)) {
+      STARTING_ROWS = +document.getElementById('height').value;
     } else {
-      $('#height').val(STARTING_ROWS);
+      document.getElementById('height').value = STARTING_ROWS;
     }
-    if (!isNaN($('#number-of-bombs').val()) && $('#number-of-bombs').val() < STARTING_COLS * STARTING_ROWS * 0.75) {
-      STARTING_BOMBS = +$('#number-of-bombs').val();
+
+    if (!isNaN(bombs) && bombs < STARTING_COLS * STARTING_ROWS * 0.75) {
+      STARTING_BOMBS = +bombs;
     } else {
-      $('#number-of-bombs').val(Math.floor(STARTING_COLS * STARTING_ROWS * 0.75));
-      window.alert(Math.floor(STARTING_COLS * STARTING_ROWS * 0.75));
+      document.getElementById('number-of-bombs').value = Math.floor(STARTING_COLS * STARTING_ROWS * 0.75);
     }
     // get the new board set up
-    $('#board-container').html('<table id="main-table" cellpadding="0" cellspacing="0" border="0"></table>');
-    table = $('#main-table');
+    table = document.createElement('table');
+    table.id = 'main-table';
+    table.border = 0;
+    board.appendChild(table);
     section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
-    table.append(section.element);
+    table.appendChild(section.element);
     // start the timer
-    table.one('click', function () {
+    $(table).one('click', function () {
       TIMER_REFERENCE = window.setInterval(function() {
         timer++;
-        $('#timer').html(timer);
+        document.getElementById('timer').textContent = timer;
       }, 1000);
     });
-    table.click(leftClick)
-    table[0].oncontextmenu = rightClick;
+    $(table).click(leftClick)
+    table.oncontextmenu = rightClick;
   }
 
   $(function () {

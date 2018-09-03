@@ -14,6 +14,8 @@ h2{
 }
 table{
   clear: left;
+  border-spacing: 0;
+  border-collapse: collapse;
 }
 table, .menu-container{
   empty-cells: show;
@@ -87,6 +89,9 @@ dd{
 #restart{
   color: black;
   cursor: pointer;
+}
+td {
+  padding: 0;
 }
 td div.empty, td div.bomb{
   height: 15px;
