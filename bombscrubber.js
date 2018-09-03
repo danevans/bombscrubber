@@ -88,15 +88,15 @@
         GRID[i] = [];
         const first = (i === offset && i !== 0);
         for (let j = 0; j < cols; j++) {
-          GRID[i][j] = new Cell(i, j, this);
-          row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
+          const thisCell = GRID[i][j] = new Cell(i, j, this);
+          row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
             if (j > 0) {
-              if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
+              if (GRID[i - 1][j - 1].number > 8) { thisCell.number++; }
             }
-            if (GRID[i - 1][j].number > 8) { GRID[i][j].number++; }
+            if (GRID[i - 1][j].number > 8) { thisCell.number++; }
             if (j < cols - 1) {
-              if (GRID[i - 1][j + 1].number > 8) { GRID[i][j].number++; }
+              if (GRID[i - 1][j + 1].number > 8) { thisCell.number++; }
             }
           }
         }
