@@ -95,10 +95,13 @@
     GAMEOVER = true;
   }
 
-  function newSection(rows, cols, bombs, offset) {
-    var i, j, first, totalCycles = CYCLES.length,
-      newBombR, newBombC, currentCell, tbody, row;
-    tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>');
+  function Section(rows, cols, bombs, offset) {
+    var i, j, first, totalCycles = CYCLES.length, tbody, row;
+    this.rows = rows;
+    this.cols = cols;
+    this.bombs = bombs;
+    this.offset = offset;
+    this.element = tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>');
     for (i = offset; i < rows + offset; i++) {
       row = $('<tr></tr>');
       tbody.append(row);
@@ -123,11 +126,15 @@
     }
     // add entry in the cycles array for this cycle
     CYCLES[totalCycles] = 0;
-    // add bombs to the table
-    i = 0;
-    while (i < bombs) {
-      newBombR = Math.floor((Math.random() * rows)) + offset;
-      newBombC = Math.floor((Math.random() * cols));
+    this.addBombs();
+    this.updateGlobals();
+  }
+
+  Section.prototype.addBombs = function() {
+    var i = 0, newBombC, newBombR, currentCell;
+    while (i < this.bombs) {
+      newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
+      newBombC = Math.floor((Math.random() * this.cols));
       currentCell = GRID[newBombR][newBombC];
       if (currentCell.number < 9) {
         currentCell.number = 9;
@@ -135,17 +142,18 @@
         i++;
       }
     }
-    // update the global 'current' variabes
-    CURRENT_BOMBS += bombs;
-    CURRENT_ROWS += rows;
-    CURRENT_CELLS += rows * cols;
+  }
+
+  Section.prototype.updateGlobals = function() {
+    CURRENT_BOMBS += this.bombs;
+    CURRENT_ROWS += this.rows;
+    CURRENT_CELLS += this.rows * this.cols;
     $('#rows').html(CURRENT_ROWS);
     $('#total-bombs').html(CURRENT_BOMBS);
     $('#covered-squares').html(CURRENT_CELLS);
     $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
     $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
-    return tbody;
-  }
+  };
 
   Cell = function (row, col) {
     this.row = row;
@@ -157,13 +165,15 @@
   };
 
   Cell.prototype.click = function () {
+    var section;
     if (this.covered && !this.flagged) {
       this.covered = false;
       CURRENT_CELLS--;
       $('#covered-squares').html(CURRENT_CELLS);
       this.element.addClass('empty');
       if (this.row === CURRENT_ROWS - 1) {
-        $('#main-table').append(newSection(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS));
+        section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+        $('#main-table').append(section.element);
       }
       if (this.number === 0) {
         clickAround(this);
@@ -220,7 +230,7 @@
     CURRENT_CYCLE = 0;
     GAMEOVER = false;
     var timer = 0,
-      table;
+      table, section;
     $('#timer').html(timer);
     //check some possibly user set variables
     if (!isNaN($('#width').val())) {
@@ -242,7 +252,8 @@
     // get the new board set up
     $('#board-container').html('<table id="main-table" cellpadding="0" cellspacing="0" border="0"></table>');
     table = $('#main-table');
-    table.append(newSection(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS));
+    section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
+    table.append(section.element);
     // start the timer
     table.one('click', function () {
       var timerReference = window.setInterval(function() {
