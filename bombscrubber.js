@@ -10,6 +10,7 @@
     CYCLES = [],
     CURRENT_CYCLE = 0,
     GAMEOVER = false,
+    TIMER_REFERENCE,
     Cell,
     numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
@@ -231,6 +232,7 @@
     GAMEOVER = false;
     var timer = 0,
       table, section;
+    window.clearTimeout(TIMER_REFERENCE);
     $('#timer').html(timer);
     //check some possibly user set variables
     if (!isNaN($('#width').val())) {
@@ -256,12 +258,10 @@
     table.append(section.element);
     // start the timer
     table.one('click', function () {
-      var timerReference = window.setInterval(function() {
+      TIMER_REFERENCE = window.setInterval(function() {
         if (!GAMEOVER) {
           timer++;
           $('#timer').html(timer);
-        } else {
-          window.clearTimeout(timerReference);
         }
       }, 1000);
     });
@@ -269,7 +269,6 @@
     table[0].oncontextmenu = rightClick;
   }
 
-  //print the table and add a section to it then turn on the click handlers
   $(function () {
     initBoard();
     $('#restart').click(function () {
