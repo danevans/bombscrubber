@@ -58,6 +58,7 @@
   }
 
   function leftClick(e) {
+    e.preventDefault();
     var thisCell = lookupCell(e.target);
     if (!thisCell) { return false; }
     if (thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
@@ -66,6 +67,7 @@
   }
 
   function rightClick(e) {
+    e.preventDefault();
     // first account for browser inconsistency
     var t, thisCell;
     if (!e) {e = window.event; }
@@ -83,15 +85,12 @@
     } else if (thisCell.number === getFlags(thisCell) && thisCell.number !== 0 && thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
       clickAround(thisCell);
     }
-    return false;
   }
 
   function gameover() {
     window.clearTimeout(TIMER_REFERENCE);
-    $('#main-table').unbind();
-    document.getElementById('main-table').oncontextmenu = function () {
-      return false;
-    };
+    document.getElementById('main-table').removeEventListener('click', leftClick);
+    document.getElementById('main-table').removeEventListener('contextmenu', rightClick);
   }
 
   function Section(rows, cols, bombs, offset) {
@@ -264,21 +263,21 @@
     section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
     table.appendChild(section.element);
     // start the timer
-    $(table).one('click', function () {
+    table.addEventListener('click', function () {
       TIMER_REFERENCE = window.setInterval(function() {
         timer++;
         document.getElementById('timer').textContent = timer;
       }, 1000);
-    });
-    $(table).click(leftClick)
-    table.oncontextmenu = rightClick;
+    }, { once: true });
+    table.addEventListener('click', leftClick);
+    table.addEventListener('contextmenu', rightClick);
   }
 
-  $(function () {
+  window.onload = function () {
     initBoard();
-    $('#restart').click(function () {
+    document.getElementById('restart').addEventListener('click', function () {
       initBoard();
     });
-  });
+  };
 
 }());
