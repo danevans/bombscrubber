@@ -9,7 +9,6 @@
     GRID = [],
     CYCLES = [],
     CURRENT_CYCLE = 0,
-    GAMEOVER = false,
     TIMER_REFERENCE,
     Cell,
     numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
@@ -89,11 +88,11 @@
   }
 
   function gameover() {
+    window.clearTimeout(TIMER_REFERENCE);
     $('#main-table').unbind();
     document.getElementById('main-table').oncontextmenu = function () {
       return false;
     };
-    GAMEOVER = true;
   }
 
   function Section(rows, cols, bombs, offset) {
@@ -229,7 +228,6 @@
     GRID = [];
     CYCLES = [];
     CURRENT_CYCLE = 0;
-    GAMEOVER = false;
     var timer = 0,
       table, section;
     window.clearTimeout(TIMER_REFERENCE);
@@ -259,10 +257,8 @@
     // start the timer
     table.one('click', function () {
       TIMER_REFERENCE = window.setInterval(function() {
-        if (!GAMEOVER) {
-          timer++;
-          $('#timer').html(timer);
-        }
+        timer++;
+        $('#timer').html(timer);
       }, 1000);
     });
     table.click(leftClick)
