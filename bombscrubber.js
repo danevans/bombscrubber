@@ -52,9 +52,8 @@
   }
 
   function lookupCell(element) {
-    var $element = $(element);
     if (element.tagName === 'DIV') {
-      return GRID[$element.data('row')][$element.data('col')];
+      return GRID[element.dataset.row][element.dataset.col];
     }
   }
 
@@ -161,7 +160,9 @@
     this.number = 0;
     this.covered = true;
     this.flagged = false;
-    this.element = $('<div></div>').data({ row: row, col: col });
+    this.element = document.createElement('div');
+    this.element.dataset.row = row;
+    this.element.dataset.col = col;
   };
 
   Cell.prototype.click = function () {
@@ -170,7 +171,7 @@
       this.covered = false;
       CURRENT_CELLS--;
       $('#covered-squares').html(CURRENT_CELLS);
-      this.element.addClass('empty');
+      this.element.classList.add('empty');
       if (this.row === CURRENT_ROWS - 1) {
         section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
         $('#main-table').append(section.element);
@@ -178,12 +179,13 @@
       if (this.number === 0) {
         clickAround(this);
       } else if (this.number < 9) {
-        this.element.addClass(numClasses[this.number]).text(this.number);
+        this.element.classList.add(numClasses[this.number]);
+        this.element.textContent = this.number;
       } else {
-        this.element.addClass('bomb').css('backgroundColor', 'red');
+        this.element.classList.add('bomb', 'exploded');
         everyCell(function(thisCell) {
           if (thisCell.number > 8 && !thisCell.flagged) {
-            thisCell.element.addClass('bomb');
+            thisCell.element.classList.add('bomb');
           }
         });
         gameover();
@@ -192,7 +194,7 @@
       if (CURRENT_CELLS === CURRENT_BOMBS) {
         everyCell(function(thisCell) {
           if (thisCell.number > 8) {
-            thisCell.element.addClass('flag');
+            thisCell.element.classList.add('flag');
           }
         });
         gameover();
@@ -213,7 +215,7 @@
     } else {
       TOTAL_FLAGS--;
     }
-    this.element.toggleClass('flag');
+    this.element.classList.toggle('flag');
     $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
   };
 

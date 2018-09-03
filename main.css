@@ -109,6 +109,9 @@ td div.flag{
 td div.bomb{
   background: url(images/bomb.png) center center no-repeat;
 }
+td div.exploded {
+  background-color: red;
+}
 .invalid td div{
   background-color: #9A77A8;
   border-top-color: #C19ECF;
