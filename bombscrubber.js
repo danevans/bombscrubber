@@ -39,14 +39,6 @@
     around(centerCell, otherCell => otherCell.click());
   }
 
-  function getFlags(centerCell) {
-    var number = 0;
-    around(centerCell, otherCell => {
-      if (otherCell.flagged) { number++; }
-    });
-    return number;
-  }
-
   function lookupCell(element) {
     if (element.tagName === 'DIV') {
       return GRID[element.dataset.row][element.dataset.col];
@@ -57,7 +49,7 @@
     e.preventDefault();
     var thisCell = lookupCell(e.target);
     if (!thisCell) { return false; }
-    if (thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
+    if (thisCell.clickable) {
       thisCell.click();
     }
   }
@@ -68,7 +60,7 @@
     if (!thisCell) { return false; }
     if (thisCell.covered === true) {
       thisCell.flag();
-    } else if (thisCell.number === getFlags(thisCell) && thisCell.number !== 0 && thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
+    } else if (thisCell.number !== 0 && thisCell.clickable && thisCell.number === thisCell.flags) {
       clickAround(thisCell);
     }
   }
@@ -94,7 +86,7 @@
         GRID[i] = [];
         first = (i === offset && i !== 0);
         for (j = 0; j < cols; j++) {
-          GRID[i][j] = new Cell(i, j);
+          GRID[i][j] = new Cell(i, j, this);
           row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
           if (first) {
             if (j > 0) {
@@ -143,15 +135,28 @@
   }
 
   class Cell {
-    constructor (row, col) {
+    constructor (row, col, section) {
       this.row = row;
       this.col = col;
+      this.section = section;
       this.number = 0;
       this.covered = true;
       this.flagged = false;
       this.element = document.createElement('div');
       this.element.dataset.row = row;
       this.element.dataset.col = col;
+    }
+
+    get clickable() {
+      return !this.section.element.classList.contains('invalid');
+    }
+
+    get flags() {
+      var number = 0;
+      around(this, otherCell => {
+        if (otherCell.flagged) { number++; }
+      });
+      return number;
     }
 
     click() {
