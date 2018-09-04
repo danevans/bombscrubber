@@ -52,13 +52,13 @@
   }
 
   function lookupCell(element) {
-    var $element = $(element);
     if (element.tagName === 'DIV') {
-      return GRID[$element.data('row')][$element.data('col')];
+      return GRID[element.dataset.row][element.dataset.col];
     }
   }
 
   function leftClick(e) {
+    e.preventDefault();
     var thisCell = lookupCell(e.target);
     if (!thisCell) { return false; }
     if (thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
@@ -67,6 +67,7 @@
   }
 
   function rightClick(e) {
+    e.preventDefault();
     // first account for browser inconsistency
     var t, thisCell;
     if (!e) {e = window.event; }
@@ -84,15 +85,12 @@
     } else if (thisCell.number === getFlags(thisCell) && thisCell.number !== 0 && thisCell.row < (CURRENT_CYCLE + 1) * STARTING_ROWS) {
       clickAround(thisCell);
     }
-    return false;
   }
 
   function gameover() {
     window.clearTimeout(TIMER_REFERENCE);
-    $('#main-table').unbind();
-    document.getElementById('main-table').oncontextmenu = function () {
-      return false;
-    };
+    document.getElementById('main-table').removeEventListener('click', leftClick);
+    document.getElementById('main-table').removeEventListener('contextmenu', rightClick);
   }
 
   function Section(rows, cols, bombs, offset) {
@@ -101,15 +99,16 @@
     this.cols = cols;
     this.bombs = bombs;
     this.offset = offset;
-    this.element = tbody = $('<tbody id="cycle' + totalCycles + '"></tbody>');
+    this.element = tbody = document.createElement('tbody');
+    tbody.id = 'cycle' + totalCycles;
     for (i = offset; i < rows + offset; i++) {
-      row = $('<tr></tr>');
-      tbody.append(row);
+      row = document.createElement('tr');
+      tbody.appendChild(row);
       GRID[i] = [];
       first = (i === offset && i !== 0);
       for (j = 0; j < cols; j++) {
         GRID[i][j] = new Cell(i, j);
-        $('<td></td>').append(GRID[i][j].element).appendTo(row);
+        row.appendChild(document.createElement('td')).appendChild(GRID[i][j].element);
         if (first) {
           if (j > 0) {
             if (GRID[i - 1][j - 1].number > 8) { GRID[i][j].number++; }
@@ -122,7 +121,7 @@
       }
     }
     if (totalCycles > CURRENT_CYCLE) {
-      tbody.addClass('invalid');
+      tbody.classList.add('invalid');
     }
     // add entry in the cycles array for this cycle
     CYCLES[totalCycles] = 0;
@@ -148,11 +147,11 @@
     CURRENT_BOMBS += this.bombs;
     CURRENT_ROWS += this.rows;
     CURRENT_CELLS += this.rows * this.cols;
-    $('#rows').html(CURRENT_ROWS);
-    $('#total-bombs').html(CURRENT_BOMBS);
-    $('#covered-squares').html(CURRENT_CELLS);
-    $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
-    $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
+    document.getElementById('rows').textContent = CURRENT_ROWS;
+    document.getElementById('total-bombs').textContent = CURRENT_BOMBS;
+    document.getElementById('covered-squares').textContent = CURRENT_CELLS;
+    document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
+    document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
   };
 
   Cell = function (row, col) {
@@ -161,7 +160,9 @@
     this.number = 0;
     this.covered = true;
     this.flagged = false;
-    this.element = $('<div></div>').data({ row: row, col: col });
+    this.element = document.createElement('div');
+    this.element.dataset.row = row;
+    this.element.dataset.col = col;
   };
 
   Cell.prototype.click = function () {
@@ -169,21 +170,22 @@
     if (this.covered && !this.flagged) {
       this.covered = false;
       CURRENT_CELLS--;
-      $('#covered-squares').html(CURRENT_CELLS);
-      this.element.addClass('empty');
+      document.getElementById('covered-squares').textContent = CURRENT_CELLS;
+      this.element.classList.add('empty');
       if (this.row === CURRENT_ROWS - 1) {
         section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
-        $('#main-table').append(section.element);
+        document.getElementById('main-table').appendChild(section.element);
       }
       if (this.number === 0) {
         clickAround(this);
       } else if (this.number < 9) {
-        this.element.addClass(numClasses[this.number]).text(this.number);
+        this.element.classList.add(numClasses[this.number]);
+        this.element.textContent = this.number;
       } else {
-        this.element.addClass('bomb').css('backgroundColor', 'red');
+        this.element.classList.add('bomb', 'exploded');
         everyCell(function(thisCell) {
           if (thisCell.number > 8 && !thisCell.flagged) {
-            thisCell.element.addClass('bomb');
+            thisCell.element.classList.add('bomb');
           }
         });
         gameover();
@@ -192,7 +194,7 @@
       if (CURRENT_CELLS === CURRENT_BOMBS) {
         everyCell(function(thisCell) {
           if (thisCell.number > 8) {
-            thisCell.element.addClass('flag');
+            thisCell.element.classList.add('flag');
           }
         });
         gameover();
@@ -200,9 +202,9 @@
       CYCLES[Math.floor(this.row / STARTING_ROWS)]++;
       if (CYCLES[CURRENT_CYCLE] === STARTING_ROWS * STARTING_COLS - STARTING_BOMBS) {
         CURRENT_CYCLE++;
-        $('#cycle' + CURRENT_CYCLE).removeClass('invalid');
+        document.getElementById('cycle' + CURRENT_CYCLE).classList.remove('invalid');
       }
-      $('#ratio').html(CURRENT_BOMBS / CURRENT_CELLS);
+      document.getElementById('ratio').textContent = CURRENT_BOMBS / CURRENT_CELLS;
     }
   };
 
@@ -213,13 +215,16 @@
     } else {
       TOTAL_FLAGS--;
     }
-    this.element.toggleClass('flag');
-    $('#bombs-left').html(CURRENT_BOMBS - TOTAL_FLAGS);
+    this.element.classList.toggle('flag');
+    document.getElementById('bombs-left').textContent = CURRENT_BOMBS - TOTAL_FLAGS;
   };
 
   function initBoard() {
+    var board = document.getElementById('board-container');
     // remove any old board
-    $('#board-container').html();
+    board.childNodes.forEach(function(node) {
+      board.removeChild(node);
+    });
     // reinitialize variables
     CURRENT_ROWS = 0;
     CURRENT_BOMBS = 0;
@@ -229,47 +234,50 @@
     CYCLES = [];
     CURRENT_CYCLE = 0;
     var timer = 0,
-      table, section;
+      table, section,
+      bombs = document.getElementById('number-of-bombs').value;
     window.clearTimeout(TIMER_REFERENCE);
-    $('#timer').html(timer);
+    document.getElementById('timer').textContent = timer;
     //check some possibly user set variables
-    if (!isNaN($('#width').val())) {
-      STARTING_COLS = +$('#width').val();
+    if (!isNaN(document.getElementById('width').value)) {
+      STARTING_COLS = +document.getElementById('width').value;
     } else {
-      $('#width').val(STARTING_COLS);
+      document.getElementById('width').value = STARTING_COLS;
     }
-    if (!isNaN($('#height').val())) {
-      STARTING_ROWS = +$('#height').val();
+    if (!isNaN(document.getElementById('height').value)) {
+      STARTING_ROWS = +document.getElementById('height').value;
     } else {
-      $('#height').val(STARTING_ROWS);
+      document.getElementById('height').value = STARTING_ROWS;
     }
-    if (!isNaN($('#number-of-bombs').val()) && $('#number-of-bombs').val() < STARTING_COLS * STARTING_ROWS * 0.75) {
-      STARTING_BOMBS = +$('#number-of-bombs').val();
+
+    if (!isNaN(bombs) && bombs < STARTING_COLS * STARTING_ROWS * 0.75) {
+      STARTING_BOMBS = +bombs;
     } else {
-      $('#number-of-bombs').val(Math.floor(STARTING_COLS * STARTING_ROWS * 0.75));
-      window.alert(Math.floor(STARTING_COLS * STARTING_ROWS * 0.75));
+      document.getElementById('number-of-bombs').value = Math.floor(STARTING_COLS * STARTING_ROWS * 0.75);
     }
     // get the new board set up
-    $('#board-container').html('<table id="main-table" cellpadding="0" cellspacing="0" border="0"></table>');
-    table = $('#main-table');
+    table = document.createElement('table');
+    table.id = 'main-table';
+    table.border = 0;
+    board.appendChild(table);
     section = new Section(STARTING_ROWS, STARTING_COLS, STARTING_BOMBS, CURRENT_ROWS);
-    table.append(section.element);
+    table.appendChild(section.element);
     // start the timer
-    table.one('click', function () {
+    table.addEventListener('click', function () {
       TIMER_REFERENCE = window.setInterval(function() {
         timer++;
-        $('#timer').html(timer);
+        document.getElementById('timer').textContent = timer;
       }, 1000);
-    });
-    table.click(leftClick)
-    table[0].oncontextmenu = rightClick;
+    }, { once: true });
+    table.addEventListener('click', leftClick);
+    table.addEventListener('contextmenu', rightClick);
   }
 
-  $(function () {
+  window.onload = function () {
     initBoard();
-    $('#restart').click(function () {
+    document.getElementById('restart').addEventListener('click', function () {
       initBoard();
     });
-  });
+  };
 
 }());

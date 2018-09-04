@@ -14,6 +14,8 @@ h2{
 }
 table{
   clear: left;
+  border-spacing: 0;
+  border-collapse: collapse;
 }
 table, .menu-container{
   empty-cells: show;
@@ -88,6 +90,9 @@ dd{
   color: black;
   cursor: pointer;
 }
+td {
+  padding: 0;
+}
 td div.empty, td div.bomb{
   height: 15px;
   width: 15px;
@@ -108,6 +113,9 @@ td div.flag{
 }
 td div.bomb{
   background: url(images/bomb.png) center center no-repeat;
+}
+td div.exploded {
+  background-color: red;
 }
 .invalid td div{
   background-color: #9A77A8;
