@@ -109,10 +109,10 @@ td div.seven { color: #000;}
 td div.eight { color: #808080;}
 
 td div.flag{
-  background: url(images/flag.png) center / contain no-repeat;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAFVBMVEUAAAAAAAAAAAD5Fij5JSj8DRv///+7GxzaAAAAAnRSTlMAAQGU/a4AAABKSURBVHjalc5RCgAgCETB0rz/lTMMjQLd3k+wA1L7r2vrHZotrCXgJEcVGDLHjEIkkoBHdH4Vg+6hEBMKcQwB2tlYAV1l8GanUphpTQJ5ICN5UQAAAABJRU5ErkJggg==) center / contain no-repeat;
 }
 td div.bomb{
-  background: url(images/bomb.png) center / contain no-repeat;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAEhJREFUeAG90kEKgCAARNGe9z90qzKmzSTSLITPE1ce+8c6AytMnj3zJOj5Cpjdc1bPQFTJ7sXjBcMYeeEL8y/PvbHn/n9u3QmBmQDxT88mtAAAAABJRU5ErkJggg==) center / contain no-repeat;
 }
 td div.exploded {
   background-color: red;
