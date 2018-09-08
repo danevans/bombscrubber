@@ -109,10 +109,10 @@ td div.seven { color: #000;}
 td div.eight { color: #808080;}
 
 td div.flag{
-  background: url(images/flag.png) center center no-repeat;
+  background: url(images/flag.png) center / contain no-repeat;
 }
 td div.bomb{
-  background: url(images/bomb.png) center center no-repeat;
+  background: url(images/bomb.png) center / contain no-repeat;
 }
 td div.exploded {
   background-color: red;
