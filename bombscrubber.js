@@ -1,9 +1,7 @@
 (function () {
-  function around({ col, row, section, game }, action) {
+  function around({ col, row, game: { grid, rows, cols } }, action) {
     const leftOK = col > 0;
-    const rightOK = col < section.cols - 1;
-    const grid = game.grid;
-    const currentRows = game.rows;
+    const rightOK = col < cols - 1;
     if (row > 0) {
       if (leftOK) { action(grid[row - 1][col - 1]) }
       action(grid[row - 1][col]);
@@ -11,7 +9,7 @@
     }
     if (leftOK) { action(grid[row][col - 1]); }
     if (rightOK) { action(grid[row][col + 1]); }
-    if (row < section.rows + currentRows - 1) {
+    if (row < rows - 1) {
       if (leftOK) { action(grid[row + 1][col - 1]); }
       action(grid[row + 1][col]);
       if (rightOK) { action(grid[row + 1][col + 1]); }
@@ -24,8 +22,8 @@
 
   class Game {
     constructor(container, rows = 16, cols = 16, bombs = 40) {
-      this.rows = 0;
       this.bombs = 0;
+      this.cols = cols;
       this.cells = 0;
       this.flags = 0;
       this.grid = [];
@@ -92,18 +90,21 @@
       container.appendChild(this.table);
     }
 
+    get rows() {
+      return this.grid.length;
+    }
+
     addSection(last) {
       const section = new Section(last);
       last.next = section;
       this.table.appendChild(section.element);
     }
 
-    updateGlobals(rows, cols, bombs) {
-      this.rows += rows;
+    updateGlobals(bombs) {
       document.getElementById('rows').textContent = this.rows;
       this.bombs += bombs;
       document.getElementById('total-bombs').textContent = this.bombs;
-      this.updateCells(rows * cols);
+      this.updateCells(this.rows * this.cols);
       this.updateFlags(0);
     }
 
@@ -188,7 +189,7 @@
       }
 
       this.addBombs();
-      this.game.updateGlobals(this.rows, this.cols, this.bombs);
+      this.game.updateGlobals(this.bombs);
     }
 
     get last() {
