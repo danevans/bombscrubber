@@ -1,4 +1,27 @@
 (function () {
+  function around({ col, row, section, game }, action) {
+    const leftOK = col > 0;
+    const rightOK = col < section.cols - 1;
+    const grid = game.grid;
+    const currentRows = game.rows;
+    if (row > 0) {
+      if (leftOK) { action(grid[row - 1][col - 1]) }
+      action(grid[row - 1][col]);
+      if (rightOK) { action(grid[row - 1][col + 1]); }
+    }
+    if (leftOK) { action(grid[row][col - 1]); }
+    if (rightOK) { action(grid[row][col + 1]); }
+    if (row < section.rows + currentRows - 1) {
+      if (leftOK) { action(grid[row + 1][col - 1]); }
+      action(grid[row + 1][col]);
+      if (rightOK) { action(grid[row + 1][col + 1]); }
+    }
+  }
+
+  function clickAround(centerCell) {
+    around(centerCell, otherCell => otherCell.click());
+  }
+
   class Game {
     constructor(container, rows = 16, cols = 16, bombs = 40) {
       this.rows = 0;
@@ -25,7 +48,7 @@
         if (thisCell.covered === true) {
           thisCell.flag();
         } else if (thisCell.number !== 0 && thisCell.clickable && thisCell.number === thisCell.flags) {
-          this.clickAround(thisCell);
+          clickAround(thisCell);
         }
       };
 
@@ -93,27 +116,6 @@
       this.cells = this.cells + amount;
       document.getElementById('covered-squares').textContent = this.cells;
       document.getElementById('ratio').textContent = this.bombs / this.cells;
-    }
-
-    around(centerCell, action) {
-      const leftOK = centerCell.col > 0;
-      const rightOK = centerCell.col < centerCell.section.cols - 1;
-      if (centerCell.row > 0) {
-        if (leftOK) { action(this.grid[centerCell.row - 1][centerCell.col - 1]) }
-        action(this.grid[centerCell.row - 1][centerCell.col]);
-        if (rightOK) { action(this.grid[centerCell.row - 1][centerCell.col + 1]); }
-      }
-      if (leftOK) { action(this.grid[centerCell.row][centerCell.col - 1]); }
-      if (rightOK) { action(this.grid[centerCell.row][centerCell.col + 1]); }
-      if (centerCell.row < centerCell.section.rows + this.rows - 1) {
-        if (leftOK) { action(this.grid[centerCell.row + 1][centerCell.col - 1]); }
-        action(this.grid[centerCell.row + 1][centerCell.col]);
-        if (rightOK) { action(this.grid[centerCell.row + 1][centerCell.col + 1]); }
-      }
-    }
-
-    clickAround(centerCell) {
-      this.around(centerCell, otherCell => otherCell.click());
     }
 
     lookupCell(element) {
@@ -201,7 +203,7 @@
         const currentCell = this.game.grid[newBombR][newBombC];
         if (currentCell.number < 9) {
           currentCell.number = 9;
-          this.game.around(currentCell, otherCell => otherCell.number++);
+          around(currentCell, otherCell => otherCell.number++);
           i++;
         }
       }
@@ -228,7 +230,7 @@
 
     get flags() {
       let number = 0;
-      this.game.around(this, otherCell => {
+      around(this, otherCell => {
         if (otherCell.flagged) { number++; }
       });
       return number;
@@ -244,7 +246,7 @@
           this.game.addSection(this.section.last);
         }
         if (this.number === 0) {
-          this.game.clickAround(this);
+          clickAround(this);
         } else if (this.number < 9) {
           this.element.classList.add(Cell.numClasses[this.number]);
           this.element.textContent = this.number;
@@ -273,7 +275,7 @@
   Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
   function initBoard() {
-    const game = new Game(document.getElementById('board-container'));
+    return new Game(document.getElementById('board-container'));
   }
 
   window.onload = function () {
