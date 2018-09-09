@@ -1,7 +1,6 @@
 body{
   background-color: #C0C0C0;
-  font-family: verdana, arial, helvetica, sans-serif;
-  font-size: 14px;
+  font: 14px verdana, arial, helvetica, sans-serif;
 }
 h2{
   text-align: center;
@@ -36,9 +35,11 @@ table, .menu-container{
   padding: 5px 5px 0 5px;
   width: 245px;
 }
+.current {
+  clear: none;
+}
 td div{
-  font-family: "Courier New", Courier, monospace;
-  font-weight: bold;
+  font: bold 15px "Courier New", Courier, monospace;
   text-align: center;
   padding: 0;
   margin: 0;
@@ -50,6 +51,7 @@ td div{
   border-right: 2px solid #808080;
   border-bottom: 2px solid #808080;
   cursor: pointer;
+  position: relative;
 }
 #timer, #restart, #covered-squares, #total-bombs, #bombs-left, #width, #height, #number-of-bombs, #non-bombs, #rows, #ratio{
   background-color: #C0C0C0;
@@ -58,8 +60,7 @@ td div{
   border-right: 2px solid #808080;
   border-bottom: 2px solid #808080;
   color: red;
-  font-family: verdana;
-  font-weight: bold;
+  font: bold 14px verdana;
   text-align: center;
   margin: 0 0 5px 0;
 }
@@ -89,6 +90,8 @@ dd{
 #restart{
   color: black;
   cursor: pointer;
+  width: 100%;
+  font-size: 14px;
 }
 td {
   padding: 0;
