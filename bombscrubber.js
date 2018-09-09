@@ -170,25 +170,25 @@
       for (let i = this.offset; i < rows + this.offset; i++) {
         const row = document.createElement('tr');
         this.element.appendChild(row);
-        this.game.grid[i] = [];
+        game.grid[i] = [];
         const first = (i === this.offset && i !== 0);
         for (let j = 0; j < cols; j++) {
-          const thisCell = this.game.grid[i][j] = new Cell(i, j, this);
+          const thisCell = game.grid[i][j] = new Cell(i, j, this);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
             if (j > 0) {
-              if (this.game.grid[i - 1][j - 1].number > 8) { thisCell.number++; }
+              if (game.grid[i - 1][j - 1].number > 8) { thisCell.number++; }
             }
-            if (this.game.grid[i - 1][j].number > 8) { thisCell.number++; }
+            if (game.grid[i - 1][j].number > 8) { thisCell.number++; }
             if (j < cols - 1) {
-              if (this.game.grid[i - 1][j + 1].number > 8) { thisCell.number++; }
+              if (game.grid[i - 1][j + 1].number > 8) { thisCell.number++; }
             }
           }
         }
       }
 
       this.addBombs();
-      this.game.updateGlobals(this.bombs);
+      game.updateGlobals(this.bombs);
     }
 
     get last() {
@@ -259,6 +259,7 @@
           this.game.win();
         }
         this.section.clicks++;
+        // Isn't this just the same as the win above? Can we get rid of `clicks`
         if (this.section.clicks === this.section.rows * this.section.cols - this.section.bombs && this.section.next) {
           this.section.next.element.classList.remove('invalid');
         }
