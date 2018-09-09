@@ -1,0 +1,8 @@
+{
+  "name": "bombscrubber",
+  "version": "1.0.0",
+  "main": "bombscrubber.js",
+  "repository": "https://github.com/danevans/bombscrubber",
+  "author": "Danston <thedanevans@gmail.com>",
+  "license": "MIT"
+}
