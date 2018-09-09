@@ -115,7 +115,7 @@ td div.bomb{
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAAACVBMVEUAAAAAAAD///+D3c/SAAAAAXRSTlMAQObYZgAAAEhJREFUeAG90kEKgCAARNGe9z90qzKmzSTSLITPE1ce+8c6AytMnj3zJOj5Cpjdc1bPQFTJ7sXjBcMYeeEL8y/PvbHn/n9u3QmBmQDxT88mtAAAAABJRU5ErkJggg==) center / contain no-repeat;
 }
 td div.exploded {
-  background-color: red;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAAAIVBMVEUAAAD8DRv/AADAwMD5Fij76Df8DRv8iA386g3/AAD///+Z6rjOAAAAA3RSTlMAAAD6dsTeAAAAqElEQVR4AZXR0arEIAyE4XY4jvvv+z/wQcWmQRQ2Fzr1i6L0+qm0LtmR8bJuYjMEwxNGp5lLtPLDMGddkpT4EsB9Q60gjXni3KfETtzgPebHnVmCUmr9fGotBZR14bfTq+H32xrWZ62Mhg4a2Ko1jJbO9o4Vd9scvmM7tOPh3UcGmPcfo16uI89bSj3JTr/Etq/gO3M+RS2ZHd8HVmTzt3Bks7A2X4f6B+rcDM9d5aG+AAAAAElFTkSuQmCC) center / contain no-repeat;
 }
 .invalid td div{
   background-color: #9A77A8;
