@@ -260,7 +260,7 @@
           this.game.win();
         }
         this.section.clicks++;
-        if (this.section.clicks === this.section.rows * this.section.cols - this.section.bombs) {
+        if (this.section.clicks === this.section.rows * this.section.cols - this.section.bombs && this.section.next) {
           this.section.next.element.classList.remove('invalid');
         }
       }
