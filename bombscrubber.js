@@ -1,8 +1,29 @@
 (function () {
+  function around({ col, row, game: { grid, rows, cols } }, action) {
+    const leftOK = col > 0;
+    const rightOK = col < cols - 1;
+    if (row > 0) {
+      if (leftOK) { action(grid[row - 1][col - 1]) }
+      action(grid[row - 1][col]);
+      if (rightOK) { action(grid[row - 1][col + 1]); }
+    }
+    if (leftOK) { action(grid[row][col - 1]); }
+    if (rightOK) { action(grid[row][col + 1]); }
+    if (row < rows - 1) {
+      if (leftOK) { action(grid[row + 1][col - 1]); }
+      action(grid[row + 1][col]);
+      if (rightOK) { action(grid[row + 1][col + 1]); }
+    }
+  }
+
+  function clickAround(centerCell) {
+    around(centerCell, otherCell => otherCell.click());
+  }
+
   class Game {
     constructor(container, rows = 16, cols = 16, bombs = 40) {
-      this.rows = 0;
       this.bombs = 0;
+      this.cols = cols;
       this.cells = 0;
       this.flags = 0;
       this.grid = [];
@@ -25,7 +46,7 @@
         if (thisCell.covered === true) {
           thisCell.flag();
         } else if (thisCell.number !== 0 && thisCell.clickable && thisCell.number === thisCell.flags) {
-          this.clickAround(thisCell);
+          clickAround(thisCell);
         }
       };
 
@@ -69,18 +90,20 @@
       container.appendChild(this.table);
     }
 
-    addSection(last) {
-      const section = new Section(last);
-      last.next = section;
-      this.table.appendChild(section.element);
+    get rows() {
+      return this.grid.length;
     }
 
-    updateGlobals(rows, cols, bombs) {
-      this.rows += rows;
+    addSection(last) {
+      last.next = new Section(last);
+      this.table.appendChild(last.next.element);
+    }
+
+    updateGlobals(bombs) {
       document.getElementById('rows').textContent = this.rows;
       this.bombs += bombs;
       document.getElementById('total-bombs').textContent = this.bombs;
-      this.updateCells(rows * cols);
+      this.updateCells(this.rows * this.cols);
       this.updateFlags(0);
     }
 
@@ -95,30 +118,9 @@
       document.getElementById('ratio').textContent = this.bombs / this.cells;
     }
 
-    around(centerCell, action) {
-      const leftOK = centerCell.col > 0;
-      const rightOK = centerCell.col < centerCell.section.cols - 1;
-      if (centerCell.row > 0) {
-        if (leftOK) { action(this.grid[centerCell.row - 1][centerCell.col - 1]) }
-        action(this.grid[centerCell.row - 1][centerCell.col]);
-        if (rightOK) { action(this.grid[centerCell.row - 1][centerCell.col + 1]); }
-      }
-      if (leftOK) { action(this.grid[centerCell.row][centerCell.col - 1]); }
-      if (rightOK) { action(this.grid[centerCell.row][centerCell.col + 1]); }
-      if (centerCell.row < centerCell.section.rows + this.rows - 1) {
-        if (leftOK) { action(this.grid[centerCell.row + 1][centerCell.col - 1]); }
-        action(this.grid[centerCell.row + 1][centerCell.col]);
-        if (rightOK) { action(this.grid[centerCell.row + 1][centerCell.col + 1]); }
-      }
-    }
-
-    clickAround(centerCell) {
-      this.around(centerCell, otherCell => otherCell.click());
-    }
-
-    lookupCell(element) {
-      if (element.tagName === 'DIV') {
-        return this.grid[element.dataset.row][element.dataset.col];
+    lookupCell({ tagName, dataset }) {
+      if (tagName === 'DIV') {
+        return this.grid[dataset.row][dataset.col];
       }
     }
 
@@ -135,18 +137,18 @@
     }
 
     win() {
-      this.everyCell(thisCell => {
-        if (thisCell.number > 8) {
-          thisCell.element.classList.add('flag');
+      this.everyCell(({ number, element }) => {
+        if (number > 8) {
+          element.classList.add('flag');
         }
       });
       this.over();
     }
 
     lose() {
-      this.everyCell(thisCell => {
-        if (thisCell.number > 8 && !thisCell.flagged) {
-          thisCell.element.classList.add('bomb');
+      this.everyCell(({ number, flagged, element }) => {
+        if (number > 8 && !flagged) {
+          element.classList.add('bomb');
         }
       });
       this.over();
@@ -159,51 +161,53 @@
       this.cols = cols;
       this.bombs = bombs;
       this.game = game;
-      this.offset = game.rows;
       this.clicks = 0;
       this.element = document.createElement('tbody');
-      if (0 < this.offset) {
+      const offset = game.rows;
+      const cells = [];
+      if (0 < offset) {
         this.element.classList.add('invalid');
       }
-      for (let i = this.offset; i < rows + this.offset; i++) {
+      for (let i = offset; i < rows + offset; i++) {
         const row = document.createElement('tr');
         this.element.appendChild(row);
-        this.game.grid[i] = [];
-        const first = (i === this.offset && i !== 0);
+        game.grid[i] = [];
+        const first = (i === offset && i !== 0);
         for (let j = 0; j < cols; j++) {
-          const thisCell = this.game.grid[i][j] = new Cell(i, j, this);
+          const thisCell = game.grid[i][j] = new Cell(i, j, this);
+          cells.push(thisCell);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
             if (j > 0) {
-              if (this.game.grid[i - 1][j - 1].number > 8) { thisCell.number++; }
+              if (game.grid[i - 1][j - 1].number > 8) { thisCell.number++; }
             }
-            if (this.game.grid[i - 1][j].number > 8) { thisCell.number++; }
+            if (game.grid[i - 1][j].number > 8) { thisCell.number++; }
             if (j < cols - 1) {
-              if (this.game.grid[i - 1][j + 1].number > 8) { thisCell.number++; }
+              if (game.grid[i - 1][j + 1].number > 8) { thisCell.number++; }
             }
           }
         }
       }
 
-      this.addBombs();
-      this.game.updateGlobals(this.rows, this.cols, this.bombs);
+      this.addBombs(cells);
+      game.updateGlobals(bombs);
     }
 
     get last() {
       return this.next ? this.next.last : this;
     }
 
-    addBombs() {
-      let i = 0;
-      while (i < this.bombs) {
-        const newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
-        const newBombC = Math.floor((Math.random() * this.cols));
-        const currentCell = this.game.grid[newBombR][newBombC];
-        if (currentCell.number < 9) {
-          currentCell.number = 9;
-          this.game.around(currentCell, otherCell => otherCell.number++);
-          i++;
-        }
+    get finished() {
+      return this.clicks === this.rows * this.cols - this.bombs;
+    }
+
+    addBombs(cells) {
+      for (let i = 0; i < this.bombs; i++) {
+        const index = Math.floor(Math.random() * cells.length);
+        const currentCell = cells[index];
+        currentCell.number = 9;
+        around(currentCell, otherCell => otherCell.number++);
+        cells.splice(index, 1);
       }
     }
   }
@@ -228,8 +232,8 @@
 
     get flags() {
       let number = 0;
-      this.game.around(this, otherCell => {
-        if (otherCell.flagged) { number++; }
+      around(this, ({ flagged }) => {
+        if (flagged) { number++; }
       });
       return number;
     }
@@ -244,21 +248,21 @@
           this.game.addSection(this.section.last);
         }
         if (this.number === 0) {
-          this.game.clickAround(this);
+          clickAround(this);
         } else if (this.number < 9) {
           this.element.classList.add(Cell.numClasses[this.number]);
           this.element.textContent = this.number;
         } else {
           this.element.classList.add('bomb', 'exploded');
-          this.game.lose();
-        }
-        // every non-bomb square has been uncovered, the player wins
-        if (this.game.cells === this.game.bombs) {
-          this.game.win();
+          return this.game.lose();
         }
         this.section.clicks++;
-        if (this.section.clicks === this.section.rows * this.section.cols - this.section.bombs) {
-          this.section.next.element.classList.remove('invalid');
+        if (this.section.finished) {
+          if (this.section.next) {
+            this.section.next.element.classList.remove('invalid');
+          } else {
+            this.game.win();
+          }
         }
       }
     }
@@ -273,7 +277,7 @@
   Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
   function initBoard() {
-    const game = new Game(document.getElementById('board-container'));
+    return new Game(document.getElementById('board-container'));
   }
 
   window.onload = function () {
