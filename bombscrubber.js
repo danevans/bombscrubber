@@ -161,19 +161,21 @@
       this.cols = cols;
       this.bombs = bombs;
       this.game = game;
-      this.offset = game.rows;
       this.clicks = 0;
       this.element = document.createElement('tbody');
-      if (0 < this.offset) {
+      const offset = game.rows;
+      const cells = [];
+      if (0 < offset) {
         this.element.classList.add('invalid');
       }
-      for (let i = this.offset; i < rows + this.offset; i++) {
+      for (let i = offset; i < rows + offset; i++) {
         const row = document.createElement('tr');
         this.element.appendChild(row);
         game.grid[i] = [];
-        const first = (i === this.offset && i !== 0);
+        const first = (i === offset && i !== 0);
         for (let j = 0; j < cols; j++) {
           const thisCell = game.grid[i][j] = new Cell(i, j, this);
+          cells.push(thisCell);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
             if (j > 0) {
@@ -187,25 +189,25 @@
         }
       }
 
-      this.addBombs();
-      game.updateGlobals(this.bombs);
+      this.addBombs(cells);
+      game.updateGlobals(bombs);
     }
 
     get last() {
       return this.next ? this.next.last : this;
     }
 
-    addBombs() {
-      let i = 0;
-      while (i < this.bombs) {
-        const newBombR = Math.floor((Math.random() * this.rows)) + this.offset;
-        const newBombC = Math.floor((Math.random() * this.cols));
-        const currentCell = this.game.grid[newBombR][newBombC];
-        if (currentCell.number < 9) {
-          currentCell.number = 9;
-          around(currentCell, otherCell => otherCell.number++);
-          i++;
-        }
+    get finished() {
+      return this.clicks === this.rows * this.cols - this.bombs;
+    }
+
+    addBombs(cells) {
+      for (let i = 0; i < this.bombs; i++) {
+        const index = Math.floor(Math.random() * cells.length);
+        const currentCell = cells[index];
+        currentCell.number = 9;
+        around(currentCell, otherCell => otherCell.number++);
+        cells.splice(index, 1);
       }
     }
   }
@@ -252,16 +254,15 @@
           this.element.textContent = this.number;
         } else {
           this.element.classList.add('bomb', 'exploded');
-          this.game.lose();
-        }
-        // every non-bomb square has been uncovered, the player wins
-        if (this.game.cells === this.game.bombs) {
-          this.game.win();
+          return this.game.lose();
         }
         this.section.clicks++;
-        // Isn't this just the same as the win above? Can we get rid of `clicks`
-        if (this.section.clicks === this.section.rows * this.section.cols - this.section.bombs && this.section.next) {
-          this.section.next.element.classList.remove('invalid');
+        if (this.section.finished) {
+          if (this.section.next) {
+            this.section.next.element.classList.remove('invalid');
+          } else {
+            this.game.win();
+          }
         }
       }
     }
