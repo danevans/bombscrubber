@@ -1,9 +1,9 @@
-(function () {
+(function() {
   function around({ col, row, game: { grid, rows, cols } }, action) {
     const leftOK = col > 0;
     const rightOK = col < cols - 1;
     if (row > 0) {
-      if (leftOK) { action(grid[row - 1][col - 1]) }
+      if (leftOK) { action(grid[row - 1][col - 1]); }
       action(grid[row - 1][col]);
       if (rightOK) { action(grid[row - 1][col + 1]); }
     }
