@@ -95,9 +95,8 @@
     }
 
     addSection(last) {
-      const section = new Section(last);
-      last.next = section;
-      this.table.appendChild(section.element);
+      last.next = new Section(last);
+      this.table.appendChild(last.next.element);
     }
 
     updateGlobals(bombs) {
@@ -119,9 +118,9 @@
       document.getElementById('ratio').textContent = this.bombs / this.cells;
     }
 
-    lookupCell(element) {
-      if (element.tagName === 'DIV') {
-        return this.grid[element.dataset.row][element.dataset.col];
+    lookupCell({ tagName, dataset }) {
+      if (tagName === 'DIV') {
+        return this.grid[dataset.row][dataset.col];
       }
     }
 
@@ -138,18 +137,18 @@
     }
 
     win() {
-      this.everyCell(thisCell => {
-        if (thisCell.number > 8) {
-          thisCell.element.classList.add('flag');
+      this.everyCell(({ number, element }) => {
+        if (number > 8) {
+          element.classList.add('flag');
         }
       });
       this.over();
     }
 
     lose() {
-      this.everyCell(thisCell => {
-        if (thisCell.number > 8 && !thisCell.flagged) {
-          thisCell.element.classList.add('bomb');
+      this.everyCell(({ number, flagged, element }) => {
+        if (number > 8 && !flagged) {
+          element.classList.add('bomb');
         }
       });
       this.over();
@@ -231,8 +230,8 @@
 
     get flags() {
       let number = 0;
-      around(this, otherCell => {
-        if (otherCell.flagged) { number++; }
+      around(this, ({ flagged }) => {
+        if (flagged) { number++; }
       });
       return number;
     }
