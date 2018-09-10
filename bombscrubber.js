@@ -74,14 +74,13 @@
       this.table = document.createElement('table');
       this.addSection({ rows, cols, bombs, game: this });
 
-      // start the timer
-      let timer = 0;
+      // setup the timer
       window.clearTimeout(this.timerReference);
-      document.getElementById('timer').textContent = timer;
+      document.getElementById('timer').textContent = 0;
       this.table.addEventListener('click', () => {
+        const start = new Date();
         this.timerReference = window.setInterval(() => {
-          timer++;
-          document.getElementById('timer').textContent = timer;
+          document.getElementById('timer').textContent = Math.floor((new Date() - start) / 1000);
         }, 1000);
       }, { once: true });
 
