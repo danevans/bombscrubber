@@ -1,23 +1,20 @@
 (function() {
-  function around({ col, row, game: { grid, rows, cols } }, action) {
-    const leftOK = col > 0;
-    const rightOK = col < cols - 1;
-    if (row > 0) {
-      if (leftOK) { action(grid[row - 1][col - 1]); }
-      action(grid[row - 1][col]);
-      if (rightOK) { action(grid[row - 1][col + 1]); }
-    }
-    if (leftOK) { action(grid[row][col - 1]); }
-    if (rightOK) { action(grid[row][col + 1]); }
-    if (row < rows - 1) {
-      if (leftOK) { action(grid[row + 1][col - 1]); }
-      action(grid[row + 1][col]);
-      if (rightOK) { action(grid[row + 1][col + 1]); }
-    }
+  const adjacentCoords = [
+    [-1, -1], [-1, 0], [-1, +1],
+    [ 0, -1],          [ 0, +1],
+    [+1, -1], [+1, 0], [+1, +1]
+  ];
+
+  function around({ col, row, game: { grid } }) {
+    return adjacentCoords.reduce((acc, [v, h]) => {
+      const r = grid[row + v];
+      if (r && r[col + h]) { acc.push(r[col + h]); }
+      return acc;
+    }, []);
   }
 
   function clickAround(centerCell) {
-    around(centerCell, otherCell => otherCell.click());
+    around(centerCell).forEach(otherCell => otherCell.click());
   }
 
   class Game {
@@ -176,13 +173,9 @@
           cells.push(thisCell);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
-            if (j > 0) {
-              if (game.grid[i - 1][j - 1].number > 8) { thisCell.number++; }
-            }
-            if (game.grid[i - 1][j].number > 8) { thisCell.number++; }
-            if (j < cols - 1) {
-              if (game.grid[i - 1][j + 1].number > 8) { thisCell.number++; }
-            }
+            around(thisCell).forEach(otherCell => {
+              if (otherCell.number > 8) { thisCell.number++; }
+            });
           }
         }
       }
@@ -204,7 +197,7 @@
         const index = Math.floor(Math.random() * cells.length);
         const currentCell = cells[index];
         currentCell.number = 9;
-        around(currentCell, otherCell => otherCell.number++);
+        around(currentCell).forEach(otherCell => otherCell.number++);
         cells.splice(index, 1);
       }
     }
@@ -229,11 +222,7 @@
     }
 
     get flags() {
-      let number = 0;
-      around(this, ({ flagged }) => {
-        if (flagged) { number++; }
-      });
-      return number;
+      return around(this).filter(({ flagged }) => flagged).length;
     }
 
     click() {
