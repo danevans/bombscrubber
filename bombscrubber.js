@@ -243,7 +243,9 @@
 
         this.element.classList.add('empty');
         if (this.row === this.game.rows - 1) {
-          this.game.addSection(this.section.last);
+          if (document.getElementById('infinite').checked) {
+            this.game.addSection(this.section.last);
+          }
         }
         if (this.number === 0) {
           clickAround(this);
