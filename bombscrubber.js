@@ -74,14 +74,12 @@
       this.table = document.createElement('table');
       this.addSection({ rows, cols, bombs, game: this });
 
-      // start the timer
-      let timer = 0;
-      window.clearTimeout(this.timerReference);
-      document.getElementById('timer').textContent = timer;
+      // setup the timer
+      document.getElementById('timer').textContent = 0;
       this.table.addEventListener('click', () => {
+        const start = new Date();
         this.timerReference = window.setInterval(() => {
-          timer++;
-          document.getElementById('timer').textContent = timer;
+          document.getElementById('timer').textContent = Math.floor((new Date() - start) / 1000);
         }, 1000);
       }, { once: true });
 
@@ -276,13 +274,12 @@
 
   Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
-  function initBoard() {
-    return new Game(document.getElementById('board-container'));
-  }
-
   window.onload = function () {
-    initBoard();
-    document.getElementById('restart').addEventListener('click', initBoard);
+    let { timerReference } = new Game(document.getElementById('board-container'));
+    document.getElementById('restart').addEventListener('click', () => {
+      window.clearTimeout(timerReference);
+      ({ timerReference } = new Game(document.getElementById('board-container')));
+    });
   };
 
 }());
