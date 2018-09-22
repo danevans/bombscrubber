@@ -132,8 +132,8 @@
     }
 
     win() {
-      this.everyCell(({ number, element }) => {
-        if (number > 8) {
+      this.everyCell(({ bomb, element }) => {
+        if (bomb) {
           element.classList.add('flag');
         }
       });
@@ -141,8 +141,8 @@
     }
 
     lose() {
-      this.everyCell(({ number, flagged, element }) => {
-        if (number > 8 && !flagged) {
+      this.everyCell(({ bomb, flagged, element }) => {
+        if (bomb && !flagged) {
           element.classList.add('bomb');
         }
       });
@@ -173,9 +173,7 @@
           cells.push(thisCell);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
-            around(thisCell).forEach(otherCell => {
-              if (otherCell.number > 8) { thisCell.number++; }
-            });
+            thisCell.number += around(thisCell).filter(({ bomb }) => bomb).length;
           }
         }
       }
@@ -223,6 +221,10 @@
 
     get flags() {
       return around(this).filter(({ flagged }) => flagged).length;
+    }
+
+    get bomb() {
+      return this.number > 8;
     }
 
     click() {
