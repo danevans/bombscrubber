@@ -110,7 +110,7 @@
     updateCells(amount) {
       this.cells = this.cells + amount;
       document.getElementById('covered-squares').textContent = this.cells;
-      document.getElementById('ratio').textContent = this.bombs / this.cells;
+      document.getElementById('ratio').textContent = (this.bombs / this.cells).toFixed(4);
     }
 
     lookupCell({ tagName, dataset }) {
