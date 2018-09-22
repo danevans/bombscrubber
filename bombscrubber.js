@@ -94,11 +94,11 @@
       this.table.appendChild(last.next.element);
     }
 
-    updateGlobals(bombs) {
+    updateGlobals(bombs, squares) {
       document.getElementById('rows').textContent = this.rows;
       this.bombs += bombs;
       document.getElementById('total-bombs').textContent = this.bombs;
-      this.updateCells(this.rows * this.cols);
+      this.updateCells(squares);
       this.updateFlags(0);
     }
 
@@ -179,7 +179,7 @@
       }
 
       this.addBombs(cells);
-      game.updateGlobals(bombs);
+      game.updateGlobals(bombs, rows * cols);
     }
 
     get last() {
