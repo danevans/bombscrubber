@@ -113,9 +113,9 @@
       document.getElementById('ratio').textContent = (this.bombs / this.cells).toFixed(4);
     }
 
-    lookupCell({ tagName, dataset }) {
+    lookupCell({ tagName, dataset: { row, col } }) {
       if (tagName === 'DIV') {
-        return this.grid[dataset.row][dataset.col];
+        return this.grid[row][col];
       }
     }
 
@@ -158,7 +158,7 @@
       this.game = game;
       this.clicks = 0;
       this.element = document.createElement('tbody');
-      const offset = game.rows;
+      const { rows: offset, grid } = game;
       const cells = [];
       if (0 < offset) {
         this.element.classList.add('invalid');
@@ -166,10 +166,10 @@
       for (let i = offset; i < rows + offset; i++) {
         const row = document.createElement('tr');
         this.element.appendChild(row);
-        game.grid[i] = [];
+        grid[i] = [];
         const first = (i === offset && i !== 0);
         for (let j = 0; j < cols; j++) {
-          const thisCell = game.grid[i][j] = new Cell(i, j, this);
+          const thisCell = grid[i][j] = new Cell(i, j, this);
           cells.push(thisCell);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
