@@ -40,7 +40,7 @@
         e.preventDefault();
         const thisCell = this.lookupCell(e.target);
         if (!thisCell) { return false; }
-        if (thisCell.covered === true) {
+        if (thisCell.covered) {
           thisCell.flag();
         } else if (thisCell.number !== 0 && thisCell.clickable && thisCell.number === thisCell.flags) {
           clickAround(thisCell);
@@ -103,12 +103,12 @@
     }
 
     updateFlags(amount) {
-      this.flags = this.flags + amount;
+      this.flags += amount;
       document.getElementById('bombs-left').textContent = this.bombs - this.flags;
     }
 
     updateCells(amount) {
-      this.cells = this.cells + amount;
+      this.cells += amount;
       document.getElementById('covered-squares').textContent = this.cells;
       document.getElementById('ratio').textContent = (this.bombs / this.cells).toFixed(4);
     }
