@@ -193,9 +193,7 @@
     addBombs(cells) {
       for (let i = 0; i < this.bombs; i++) {
         const index = Math.floor(Math.random() * cells.length);
-        const currentCell = cells[index];
-        currentCell.number = 9;
-        around(currentCell).forEach(otherCell => otherCell.number++);
+        cells[index].bomb = true;
         cells.splice(index, 1);
       }
     }
@@ -225,6 +223,11 @@
 
     get bomb() {
       return this.number > 8;
+    }
+
+    set bomb(bool) {
+      this.number = 9;
+      around(this).forEach(otherCell => otherCell.number++);
     }
 
     click() {
