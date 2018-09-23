@@ -72,11 +72,12 @@
       this.addSection({ rows, cols, bombs, game: this });
 
       // setup the timer
-      document.getElementById('timer').textContent = 0;
+      const timer = document.getElementById('timer');
+      timer.textContent = 0;
       this.table.addEventListener('click', () => {
         const start = new Date();
         this.timerReference = window.setInterval(() => {
-          document.getElementById('timer').textContent = Math.floor((new Date() - start) / 1000);
+          timer.textContent = Math.floor((new Date() - start) / 1000);
         }, 1000);
       }, { once: true });
 
