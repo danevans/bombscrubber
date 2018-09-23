@@ -268,10 +268,10 @@
   Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
   window.onload = function () {
-    let { timerReference } = new Game(document.getElementById('board-container'));
+    let current = new Game(document.getElementById('board-container'));
     document.getElementById('restart').addEventListener('click', () => {
-      window.clearTimeout(timerReference);
-      ({ timerReference } = new Game(document.getElementById('board-container')));
+      current.over();
+      current = new Game(document.getElementById('board-container'));
     });
   };
 
