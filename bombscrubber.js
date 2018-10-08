@@ -40,7 +40,7 @@
         e.preventDefault();
         const thisCell = this.lookupCell(e.target);
         if (!thisCell) { return false; }
-        if (thisCell.covered === true) {
+        if (thisCell.covered) {
           thisCell.flag();
         } else if (thisCell.number !== 0 && thisCell.clickable && thisCell.number === thisCell.flags) {
           clickAround(thisCell);
@@ -72,11 +72,12 @@
       this.addSection({ rows, cols, bombs, game: this });
 
       // setup the timer
-      document.getElementById('timer').textContent = 0;
+      const timer = document.getElementById('timer');
+      timer.textContent = 0;
       this.table.addEventListener('click', () => {
         const start = new Date();
         this.timerReference = window.setInterval(() => {
-          document.getElementById('timer').textContent = Math.floor((new Date() - start) / 1000);
+          timer.textContent = Math.floor((new Date() - start) / 1000);
         }, 1000);
       }, { once: true });
 
@@ -103,19 +104,19 @@
     }
 
     updateFlags(amount) {
-      this.flags = this.flags + amount;
+      this.flags += amount;
       document.getElementById('bombs-left').textContent = this.bombs - this.flags;
     }
 
     updateCells(amount) {
-      this.cells = this.cells + amount;
+      this.cells += amount;
       document.getElementById('covered-squares').textContent = this.cells;
       document.getElementById('ratio').textContent = (this.bombs / this.cells).toFixed(4);
     }
 
-    lookupCell({ tagName, dataset }) {
+    lookupCell({ tagName, dataset: { row, col } }) {
       if (tagName === 'DIV') {
-        return this.grid[dataset.row][dataset.col];
+        return this.grid[row][col];
       }
     }
 
@@ -158,7 +159,7 @@
       this.game = game;
       this.clicks = 0;
       this.element = document.createElement('tbody');
-      const offset = game.rows;
+      const { rows: offset, grid } = game;
       const cells = [];
       if (0 < offset) {
         this.element.classList.add('invalid');
@@ -166,10 +167,10 @@
       for (let i = offset; i < rows + offset; i++) {
         const row = document.createElement('tr');
         this.element.appendChild(row);
-        game.grid[i] = [];
+        grid[i] = [];
         const first = (i === offset && i !== 0);
         for (let j = 0; j < cols; j++) {
-          const thisCell = game.grid[i][j] = new Cell(i, j, this);
+          const thisCell = grid[i][j] = new Cell(i, j, this);
           cells.push(thisCell);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
@@ -193,9 +194,7 @@
     addBombs(cells) {
       for (let i = 0; i < this.bombs; i++) {
         const index = Math.floor(Math.random() * cells.length);
-        const currentCell = cells[index];
-        currentCell.number = 9;
-        around(currentCell).forEach(otherCell => otherCell.number++);
+        cells[index].bomb = true;
         cells.splice(index, 1);
       }
     }
@@ -225,6 +224,11 @@
 
     get bomb() {
       return this.number > 8;
+    }
+
+    set bomb(bool) {
+      this.number = 9;
+      around(this).forEach(otherCell => otherCell.number++);
     }
 
     click() {
@@ -268,10 +272,10 @@
   Cell.numClasses = ['empty', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
 
   window.onload = function () {
-    let { timerReference } = new Game(document.getElementById('board-container'));
+    let current = new Game(document.getElementById('board-container'));
     document.getElementById('restart').addEventListener('click', () => {
-      window.clearTimeout(timerReference);
-      ({ timerReference } = new Game(document.getElementById('board-container')));
+      current.over();
+      current = new Game(document.getElementById('board-container'));
     });
   };
 
