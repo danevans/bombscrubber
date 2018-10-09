@@ -13,8 +13,8 @@
     }, []);
   }
 
-  function clickAround(centerCell) {
-    around(centerCell).forEach(otherCell => otherCell.click());
+  function invoke(method, ...args) {
+    return obj => obj[method](...args);
   }
 
   class Game {
@@ -43,7 +43,7 @@
         if (thisCell.covered) {
           thisCell.flag();
         } else if (thisCell.number !== 0 && thisCell.clickable && thisCell.number === thisCell.flags) {
-          clickAround(thisCell);
+          around(thisCell).forEach(invoke('click'));
         }
       };
 
@@ -127,9 +127,7 @@
     }
 
     everyCell(action) {
-      this.grid.forEach(row => {
-        row.forEach(action);
-      });
+      this.grid.forEach(invoke('forEach', action));
     }
 
     win() {
@@ -160,6 +158,7 @@
       this.clicks = 0;
       this.element = document.createElement('tbody');
       const { rows: offset, grid } = game;
+      this.offset = offset;
       const cells = [];
       if (0 < offset) {
         this.element.classList.add('invalid');
@@ -189,6 +188,10 @@
 
     get finished() {
       return this.clicks === this.rows * this.cols - this.bombs;
+    }
+
+    get cells() {
+      return this.game.grid.slice(this.offset, this.offset + this.rows).flat();
     }
 
     addBombs(cells) {
@@ -243,7 +246,7 @@
           }
         }
         if (this.number === 0) {
-          clickAround(this);
+          around(this).forEach(invoke('click'));
         } else if (this.number < 9) {
           this.element.classList.add(Cell.numClasses[this.number]);
           this.element.textContent = this.number;
@@ -254,6 +257,7 @@
         this.section.clicks++;
         if (this.section.finished) {
           if (this.section.next) {
+            this.section.cells.filter(({ bomb, flagged }) => bomb && !flagged).forEach(invoke('flag'));
             this.section.next.element.classList.remove('invalid');
           } else {
             this.game.win();
