@@ -17,6 +17,10 @@
     return obj => obj[method](...args);
   }
 
+  function accessor(key) {
+    return obj => obj[key];
+  }
+
   class Game {
     constructor(container, rows = 16, cols = 16, bombs = 40) {
       this.bombs = 0;
@@ -170,7 +174,7 @@
           const thisCell = new Cell(i, j, this);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
-            thisCell.number += around(thisCell).filter(({ bomb }) => bomb).length;
+            thisCell.number += around(thisCell).filter(accessor('bomb')).length;
           }
           return thisCell;
         });
@@ -220,7 +224,7 @@
     }
 
     get flags() {
-      return around(this).filter(({ flagged }) => flagged).length;
+      return around(this).filter(accessor('flagged')).length;
     }
 
     get bomb() {
