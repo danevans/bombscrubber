@@ -156,29 +156,27 @@
       this.bombs = bombs;
       this.game = game;
       this.clicks = 0;
-      this.element = document.createElement('tbody');
       const { rows: offset, grid } = game;
       this.offset = offset;
-      const cells = [];
+      this.element = document.createElement('tbody');
       if (0 < offset) {
         this.element.classList.add('invalid');
       }
       for (let i = offset; i < rows + offset; i++) {
         const row = document.createElement('tr');
         this.element.appendChild(row);
-        grid[i] = [];
-        const first = (i === offset && i !== 0);
-        for (let j = 0; j < cols; j++) {
-          const thisCell = grid[i][j] = new Cell(i, j, this);
-          cells.push(thisCell);
+        const first = i === offset && i !== 0;
+        grid[i] = Array.from({ length: cols }, (_, j) => {
+          const thisCell = new Cell(i, j, this);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
             thisCell.number += around(thisCell).filter(({ bomb }) => bomb).length;
           }
-        }
+          return thisCell;
+        });
       }
 
-      this.addBombs(cells);
+      this.addBombs(this.cells);
       game.updateGlobals(bombs, rows * cols);
     }
 
