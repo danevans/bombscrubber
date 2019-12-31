@@ -275,7 +275,8 @@
 
   window.onload = function () {
     let current = new Game(document.getElementById('board-container'));
-    document.getElementById('restart').addEventListener('click', () => {
+    document.getElementById('game-parameters').addEventListener('submit', e => {
+      e.preventDefault();
       current.over();
       current = new Game(document.getElementById('board-container'));
     });
