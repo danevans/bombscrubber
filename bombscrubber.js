@@ -21,6 +21,10 @@
     return obj => obj[method](...args);
   }
 
+  function access(prop) {
+    return obj => obj[prop];
+  }
+
   class Game {
     constructor(container, rows = 16, cols = 16, bombs = 40) {
       this.bombs = 0;
@@ -130,24 +134,9 @@
       this.table.removeEventListener('contextmenu', this.rightClick);
     }
 
-    everyCell(action) {
-      this.grid.forEach(invoke('forEach', action));
-    }
-
-    win() {
-      this.everyCell(({ bomb, element }) => {
-        if (bomb) {
-          element.classList.add('flag');
-        }
-      });
-      this.over();
-    }
-
-    lose() {
-      this.everyCell(({ bomb, flagged, element }) => {
-        if (bomb && !flagged) {
-          element.classList.add('bomb');
-        }
+    set win(outcome) {
+      this.grid.flat().filter(access('unflaggedBomb')).forEach(({ element }) => {
+        element.classList.add(outcome ? 'flag' : 'bomb');
       });
       this.over();
     }
@@ -174,7 +163,7 @@
           const thisCell = new Cell(i, j, this);
           row.appendChild(document.createElement('td')).appendChild(thisCell.element);
           if (first) {
-            thisCell.number += around(thisCell).filter(({ bomb }) => bomb).length;
+            thisCell.number += around(thisCell).filter(access('bomb')).length;
           }
           return thisCell;
         });
@@ -203,6 +192,15 @@
         cells.splice(index, 1);
       }
     }
+
+    finish() {
+      if (this.next) {
+        this.cells.filter(access('unflaggedBomb')).forEach(invoke('flag'));
+        this.next.element.classList.remove('invalid');
+      } else {
+        this.game.win = true;
+      }
+    }
   }
 
   class Cell {
@@ -224,7 +222,7 @@
     }
 
     get flags() {
-      return around(this).filter(({ flagged }) => flagged).length;
+      return around(this).filter(access('flagged')).length;
     }
 
     get bomb() {
@@ -234,6 +232,10 @@
     set bomb(bool) {
       this.number = 9;
       around(this).forEach(otherCell => otherCell.number++);
+    }
+
+    get unflaggedBomb() {
+      return this.bomb && !this.flagged;
     }
 
     click() {
@@ -254,16 +256,11 @@
           this.element.textContent = this.number;
         } else {
           this.element.classList.add('bomb', 'exploded');
-          return this.game.lose();
+          return this.game.win = false;
         }
         this.section.clicks++;
         if (this.section.finished) {
-          if (this.section.next) {
-            this.section.cells.filter(({ bomb, flagged }) => bomb && !flagged).forEach(invoke('flag'));
-            this.section.next.element.classList.remove('invalid');
-          } else {
-            this.game.win();
-          }
+          this.section.finish();
         }
       }
     }
