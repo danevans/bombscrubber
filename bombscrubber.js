@@ -5,6 +5,10 @@
     [+1, -1], [+1, 0], [+1, +1]
   ];
 
+  function randomInt(max) {
+    return Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296 * max);
+  }
+
   function around({ col, row, game: { grid } }) {
     return adjacentCoords.reduce((acc, [v, h]) => {
       const r = grid[row + v];
@@ -194,7 +198,7 @@
 
     addBombs(cells) {
       for (let i = 0; i < this.bombs; i++) {
-        const index = Math.floor(Math.random() * cells.length);
+        const index = randomInt(cells.length);
         cells[index].bomb = true;
         cells.splice(index, 1);
       }
