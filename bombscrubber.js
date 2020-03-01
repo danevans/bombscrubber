@@ -10,11 +10,10 @@
   }
 
   function around({ col, row, game: { grid } }) {
-    return adjacentCoords.reduce((acc, [v, h]) => {
+    return adjacentCoords.map(([v, h]) => {
       const r = grid[row + v];
-      if (r && r[col + h]) { acc.push(r[col + h]); }
-      return acc;
-    }, []);
+      return r ? r[col + h] : null;
+    }).filter(i => i);
   }
 
   function invoke(method, ...args) {
